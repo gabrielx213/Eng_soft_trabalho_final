@@ -1,0 +1,111 @@
+\section{REVISÃO DOS REQUISITOS}
+
+Esta seção apresenta os requisitos funcionais e não funcionais que servem de base para o projeto do sistema MedAgenda. Por se tratar de um sistema novo, os requisitos foram integralmente especificados para esta etapa.
+
+\subsection{Requisitos Funcionais}
+
+A Tabela \ref{tab:rf} apresenta os requisitos funcionais identificados para o sistema MedAgenda.
+
+\begin{table}[H]
+\centering
+\caption{Requisitos funcionais do sistema MedAgenda.}
+\label{tab:rf}
+\begin{tabular}{|c|p{12.5cm}|}
+\hline
+\textbf{ID} & \textbf{Descrição} \\
+\hline
+RF-01 & O sistema deve permitir o cadastro de novos pacientes, incluindo nome completo, CPF, data de nascimento, telefone, e-mail e endereço. \\
+\hline
+RF-02 & O sistema deve permitir a autenticação de usuários (pacientes, médicos e administradores) por meio de e-mail e senha. \\
+\hline
+RF-03 & O sistema deve permitir que pacientes agendem consultas selecionando a especialidade médica, o médico desejado, a data e o horário disponível. \\
+\hline
+RF-04 & O sistema deve permitir que pacientes cancelem consultas agendadas com no mínimo 24 horas de antecedência. \\
+\hline
+RF-05 & O sistema deve permitir que médicos visualizem sua agenda de consultas, filtrada por data e período. \\
+\hline
+RF-06 & O sistema deve permitir que médicos registrem informações no prontuário eletrônico do paciente após a realização da consulta. \\
+\hline
+RF-07 & O sistema deve permitir que pacientes pesquisem médicos por especialidade, nome ou disponibilidade de horário. \\
+\hline
+RF-08 & O sistema deve enviar notificações automáticas de lembrete de consulta por e-mail ao paciente, 24 horas antes da data agendada. \\
+\hline
+RF-09 & O sistema deve permitir que administradores cadastrem novos médicos com suas respectivas especialidades e horários. \\
+\hline
+RF-10 & O sistema deve permitir que administradores gerem relatórios gerenciais sobre consultas e ocupação da clínica. \\
+\hline
+RF-11 & O sistema deve permitir que pacientes visualizem seu histórico de consultas realizadas. \\
+\hline
+RF-12 & O sistema deve permitir que médicos gerenciem seus horários disponíveis para agendamento. \\
+\hline
+\end{tabular}\\
+\autoria
+\end{table}
+
+\subsection{Requisitos Não Funcionais}
+
+A Tabela \ref{tab:rnf} apresenta os requisitos não funcionais identificados para o sistema.
+
+\begin{table}[H]
+\centering
+\caption{Requisitos não funcionais do sistema MedAgenda.}
+\label{tab:rnf}
+\begin{tabular}{|c|c|p{9.5cm}|}
+\hline
+\textbf{ID} & \textbf{Categoria} & \textbf{Descrição} \\
+\hline
+RNF-01 & Desempenho & O sistema deve apresentar tempo de resposta inferior a 2 segundos para as operações principais do usuário. \\
+\hline
+RNF-02 & Disponibilidade & O sistema deve garantir disponibilidade mínima de 99,5\% durante o horário comercial. \\
+\hline
+RNF-03 & Segurança & Os dados sensíveis dos pacientes e senhas devem ser armazenados de forma criptografada (LGPD). \\
+\hline
+RNF-04 & Usabilidade & A interface deve ser simples, intuitiva e responsiva para computadores e dispositivos móveis \cite{nielsen1993}. \\
+\hline
+RNF-05 & Escalabilidade & O sistema deve suportar pelo menos 500 usuários simultâneos sem perda perceptível de desempenho. \\
+\hline
+RNF-06 & Compatibilidade & O sistema deve funcionar perfeitamente nos navegadores Chrome, Firefox, Edge e Safari. \\
+\hline
+\end{tabular}\\
+\autoria
+\end{table}
+
+\subsection{Tabela de Rastreabilidade: Requisitos para Artefatos de Projeto}
+
+A Tabela \ref{tab:rastreabilidade} apresenta a rastreabilidade entre os requisitos funcionais e os artefatos de projeto produzidos neste documento.
+
+\begin{table}[H]
+\centering
+\caption{Rastreabilidade de requisitos para artefatos de projeto.}
+\label{tab:rastreabilidade}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\textbf{RF} & \textbf{Caso de Uso} & \textbf{Diagrama de Sequência} & \textbf{Caso de Teste} \\
+\hline
+RF-01 & CDU-01 & N/A & CT-01 \\
+\hline
+RF-02 & CDU-02 & DS-03 & CT-02 \\
+\hline
+RF-03 & CDU-03 & DS-01 & CT-03 \\
+\hline
+RF-04 & CDU-04 & DS-02 & CT-04 \\
+\hline
+RF-05 & CDU-05 & N/A & CT-05 \\
+\hline
+RF-06 & CDU-06 & N/A & CT-06 \\
+\hline
+RF-07 & CDU-07 & N/A & N/A \\
+\hline
+RF-08 & CDU-08 & N/A & CT-07 \\
+\hline
+RF-09 & CDU-09 & N/A & N/A \\
+\hline
+RF-10 & CDU-10 & N/A & N/A \\
+\hline
+RF-11 & CDU-11 & N/A & CT-08 \\
+\hline
+RF-12 & CDU-12 & N/A & N/A \\
+\hline
+\end{tabular}\\
+\autoria
+\end{table}

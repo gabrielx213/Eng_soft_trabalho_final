@@ -1,0 +1,69 @@
+\section{PROJETO DE SOFTWARE E ARQUITETURA}
+
+\subsection{Padrão Arquitetural Escolhido}
+
+Para o desenvolvimento do sistema \textbf{MedAgenda}, adotou-se a arquitetura em \textbf{Camadas (\textit{Layered Architecture})} combinada com o padrão \textbf{MVC (\textit{Model-View-Controller})}, onde a interface Web se comunica via API RESTful com o servidor de aplicação \cite{martin2019}.
+
+\subsection{Justificativa Técnica da Escolha Arquitetural}
+
+A escolha pela arquitetura em camadas orientada a serviços justifica-se pelos seguintes critérios técnicos:
+\begin{itemize}
+    \item \textbf{Separação de Responsabilidades}: O isolamento entre a camada de apresentação (Frontend), lógica de negócio (Services/Controllers) e persistência de dados (Repositories) simplifica a manutenção e a evolução do sistema.
+    \item \textbf{Segurança}: Por lidar com dados médicos sigilosos, a segregação de camadas permite aplicar autenticação, validação e controle de acesso antes de qualquer interação com o banco de dados.
+    \item \textbf{Testabilidade}: O desacoplamento viabiliza a criação de testes automatizados independentes para as regras de agendamento.
+\end{itemize}
+
+\subsection{Tecnologias Selecionadas e Justificativas}
+
+A Tabela \ref{tab:tecnologias} sumariza a pilha tecnológica selecionada para o sistema MedAgenda.
+
+\begin{table}[H]
+\centering
+\caption{Tecnologias selecionadas e justificativas técnicas.}
+\label{tab:tecnologias}
+\begin{tabular}{|c|c|p{8.5cm}|}
+\hline
+\textbf{Camada} & \textbf{Tecnologia} & \textbf{Justificativa Técnica} \\
+\hline
+Frontend & React.js & Interface interativa, modular baseada em componentes reutilizáveis e excelente experiência de uso. \\
+\hline
+Backend & Node.js / Express & Alta eficiência no tratamento de requisições assíncronas e facilidade de integração via API REST. \\
+\hline
+Banco de Dados & PostgreSQL & Sistema relacional estável, seguro e com rigorosa conformidade ACID para dados de saúde. \\
+\hline
+ORM & Prisma & Acesso a dados seguro e tipado, prevenindo falhas de injeção SQL. \\
+\hline
+\end{tabular}\\
+\autoria
+\end{table}
+
+\subsection{Análise de Coesão}
+
+A coesão mensura o grau em que as responsabilidades de uma classe estão funcionalmente interrelacionadas. Avaliam-se duas classes centrais:
+
+\subsubsection{1. Classe \texttt{ConsultaService}: Coesão Funcional (Alta Coesão)}
+\begin{itemize}
+    \item \textbf{Responsabilidade}: Encapsular exclusivamente as regras de negócio relativas a agendamento e cancelamento de consultas médicas.
+    \item \textbf{Avaliação}: Apresenta \textbf{Coesão Funcional} (nível mais elevado na Engenharia de Software), pois todos os seus métodos cooperam diretamente para o mesmo objetivo de negócio coeso.
+\end{itemize}
+
+\subsubsection{2. Classe \texttt{RelatorioController}: Coesão Comunicacional}
+\begin{itemize}
+    \item \textbf{Responsabilidade}: Processar requisições de relatórios gerenciais sobre consultas e taxas de ocupação da clínica.
+    \item \textbf{Avaliação}: Apresenta \textbf{Coesão Comunicacional}, uma vez que seus métodos utilizam os mesmos dados de entrada para gerar diferentes relatórios consolidados.
+\end{itemize}
+
+\subsection{Análise de Acoplamento e Propostas de Melhoria}
+
+O acoplamento mede a força de interconexão entre módulos do sistema:
+
+\subsubsection{1. Dependência: \texttt{ConsultaController} para \texttt{ConsultaService}}
+\begin{itemize}
+    \item \textbf{Classificação}: \textbf{Acoplamento de Dados (Baixo Acoplamento)}. O controlador comunica-se com o serviço passando apenas estruturas de dados simples (parâmetros da consulta).
+    \item \textbf{Avaliação}: Excelente escolha de projeto, mantendo os controladores independentes de detalhes internos de banco de dados.
+\end{itemize}
+
+\subsubsection{2. Dependência: \texttt{ConsultaService} para \texttt{NotificacaoService}}
+\begin{itemize}
+    \item \textbf{Situação e Melhoria}: Para evitar que o serviço de consulta dependa diretamente de uma implementação concreta de envio de e-mail, aplica-se a \textbf{Injeção de Dependência} \cite{gamma1995}. A classe \texttt{ConsultaService} passa a depender de uma interface abstrata \texttt{INotificador}, permitindo alterar o canal de notificação (e-mail, SMS ou WhatsApp) sem modificar as regras de agendamento.
+\end{itemize}

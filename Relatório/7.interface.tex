@@ -1,0 +1,178 @@
+\section{PROJETO DE INTERFACE E USABILIDADE}
+
+\subsection{Protótipos de Média Fidelidade}
+
+O projeto de interface do \textbf{MedAgenda} prioriza a clareza visual, a navegação objetiva e a eficiência nas tarefas diárias da clínica \cite{nielsen1993}. A seguir são apresentados os wireframes estruturais das 5 telas principais do sistema.
+
+\subsubsection{Tela 1: Autenticação de Usuários (Login)}
+A Tela de Login oferece uma interface limpa com campos de e-mail e senha, além de links rápidos para recuperação de senha e cadastro de novos pacientes.
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{11cm}
+\centering
+\vspace{0.3cm}
+\textbf{MEDAGENDA: SISTEMA DE AGENDAMENTO MÉDICO} \\
+\vspace{0.3cm}
+\textbf{Acesse sua Conta} \\
+\vspace{0.3cm}
+E-mail: \texttt{[ usuario@clinica.com.br ]} \\
+\vspace{0.2cm}
+Senha: \texttt{[ ********************** ]} \\
+\vspace{0.4cm}
+\texttt{[ ENTRAR NO SISTEMA ]} \\
+\vspace{0.3cm}
+\footnotesize \underline{Esqueci minha senha} \quad | \quad \underline{Cadastrar novo paciente} \\
+\vspace{0.3cm}
+\end{minipage}}
+\vspace{0.2cm}
+\caption{Protótipo de Média Fidelidade: Tela de Login.}
+\label{fig:tela_login}
+\autoria
+\end{figure}
+
+\subsubsection{Tela 2: Agendamento de Consulta (Visão do Paciente)}
+A Tela de Agendamento conduz o paciente em passos sequenciais simples: escolha de especialidade, escolha do médico, data e seleção do horário livre.
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{12cm}
+\vspace{0.3cm}
+\textbf{MEDAGENDA} \hfill \footnotesize Olá, Maria Silva | \underline{Meus Agendamentos} | \underline{Sair} \\
+\hrule
+\vspace{0.3cm}
+\textbf{NOVO AGENDAMENTO DE CONSULTA} \\
+\vspace{0.2cm}
+1. Especialidade: \texttt{[ Cardiologia v ]} \\
+2. Médico: \texttt{[ Dr. Carlos Eduardo (CRM 12345) v ]} \\
+3. Data: \texttt{[ 25/07/2026 ]} \\
+4. Horários Disponíveis: \\
+\quad \texttt{[ 08:00 ] [ 09:30 ] [ 11:00 ] [ 14:30 ] [ 16:00 ]} \\
+\vspace{0.4cm}
+\centering \texttt{[ CONFIRMAR AGENDAMENTO ]} \quad \texttt{[ CANCELAR ]} \\
+\vspace{0.3cm}
+\end{minipage}}
+\vspace{0.2cm}
+\caption{Protótipo de Média Fidelidade: Tela de Agendamento (Paciente).}
+\label{fig:tela_agendamento}
+\autoria
+\end{figure}
+
+\subsubsection{Tela 3: Agenda Diária do Médico (Visão do Médico)}
+A Tela de Agenda apresenta aos médicos a listagem cronológica dos atendimentos do dia, indicando o status de cada consulta e atalho para o prontuário.
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{12cm}
+\vspace{0.3cm}
+\textbf{MEDAGENDA} \hfill \footnotesize Dr. Carlos Eduardo | \underline{Horários} | \underline{Sair} \\
+\hrule
+\vspace{0.3cm}
+\textbf{MINHA AGENDA - HOJE (20/07/2026)} \hfill Filtro: \texttt{[ Hoje v ]} \\
+\vspace{0.2cm}
+\begin{center}
+\begin{tabular}{lllc}
+\textbf{Horário} & \textbf{Paciente} & \textbf{Status} & \textbf{Ação} \\
+\hline
+08:00 & João Pedro Santos & Concluída & \underline{Ver Prontuário} \\
+09:30 & Maria Silva & Confirmada & \texttt{[ INICIAR ATEND. ]} \\
+11:00 & Ana Beatriz Lima & Agendada & \underline{Ver Detalhes} \\
+\hline
+\end{tabular}
+\end{center}
+\vspace{0.2cm}
+\end{minipage}}
+\vspace{0.2cm}
+\caption{Protótipo de Média Fidelidade: Agenda Diária do Médico.}
+\label{fig:tela_agenda}
+\autoria
+\end{figure}
+
+\subsubsection{Tela 4: Registro de Prontuário Eletrônico}
+A Tela de Prontuário permite o registro estruturado de anamnese, diagnóstico (CID-10) e prescrição médica, garantindo a conclusão correta do atendimento.
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{12cm}
+\vspace{0.3cm}
+\textbf{ATENDIMENTO EM CURSO} (Paciente: \textbf{Maria Silva}, 41 anos) \\
+\hrule
+\vspace{0.3cm}
+\textbf{1. Anamnese / Queixa Principal:} \\
+\texttt{[ Paciente relata palpitações ocasionais ao esforço... ]} \\
+\vspace{0.2cm}
+\textbf{2. Diagnóstico Clínico (CID-10):} \texttt{[ I49.9 - Arritmia cardíaca ]} \\
+\vspace{0.2cm}
+\textbf{3. Prescrição Médica:} \\
+\texttt{[ Solicitado Holter 24h e Teste Ergométrico. ]} \\
+\vspace{0.4cm}
+\centering \texttt{[ FINALIZAR E ASSINAR PRONTUÁRIO ]} \quad \texttt{[ SALVAR RASCUNHO ]} \\
+\vspace{0.3cm}
+\end{minipage}}
+\vspace{0.2cm}
+\caption{Protótipo de Média Fidelidade: Registro de Prontuário.}
+\label{fig:tela_prontuario}
+\autoria
+\end{figure}
+
+\subsubsection{Tela 5: Painel de Relatórios e Gestão (Visão da Administração)}
+O Painel Administrativo consolida indicadores gerenciais de consultas, taxa de cancelamentos e ocupação da clínica.
+
+\begin{figure}[H]
+\centering
+\fbox{\begin{minipage}{12cm}
+\vspace{0.3cm}
+\textbf{MEDAGENDA: ADMINISTRAÇÃO} \hfill \footnotesize Admin | \underline{Médicos} | \underline{Relatórios} | \underline{Sair} \\
+\hrule
+\vspace{0.3cm}
+\textbf{INDICADORES GERENCIAIS - JULHO / 2026} \\
+\vspace{0.3cm}
+\begin{center}
+\begin{tabular}{ccc}
+\fbox{\textbf{Consultas: 428}} & \quad \fbox{\textbf{Cancelamentos: 6,2\%}} & \quad \fbox{\textbf{Ocupação: 88,4\%}}
+\end{tabular}
+\end{center}
+\vspace{0.4cm}
+\centering \textbf{Exportar:} \quad \texttt{[ RELATÓRIO PDF ]} \quad \texttt{[ PLANILHA EXCEL ]} \\
+\vspace{0.3cm}
+\end{minipage}}
+\vspace{0.2cm}
+\caption{Protótipo de Média Fidelidade: Painel Gerencial (Administrador).}
+\label{fig:tela_admin}
+\autoria
+\end{figure}
+
+\subsection{Fluxo de Navegação entre as Telas}
+
+A navegação no sistema segue fluxos intuitivos organizados por perfil de acesso:
+\begin{itemize}
+    \item \textbf{Fluxo do Paciente}: Login para Dashboard do Paciente para Agendar Consulta para Confirmação para Meus Agendamentos.
+    \item \textbf{Fluxo do Médico}: Login para Agenda Diária para Selecionar Paciente para Prontuário Eletrônico para Finalizar Consulta.
+    \item \textbf{Fluxo do Administrador}: Login para Painel Gerencial para Exportar Relatórios ou Cadastrar Profissionais.
+\end{itemize}
+
+\subsection{Aplicação de Heurísticas de Usabilidade (Nielsen)}
+
+A Tabela \ref{tab:nielsen} apresenta a aplicação das Heurísticas de Nielsen na concepção das interfaces do MedAgenda \cite{nielsen1993}.
+
+\begin{table}[H]
+\centering
+\caption{Aplicação das Heurísticas de Nielsen nas interfaces projetadas.}
+\label{tab:nielsen}
+\begin{tabular}{|p{3.5cm}|p{4.5cm}|p{5cm}|}
+\hline
+\textbf{Heurística} & \textbf{Evidência na Interface} & \textbf{Justificativa de Usabilidade} \\
+\hline
+1. Visibilidade do Status & Selos claros de status ("Confirmada", "Concluída") na agenda. & Mantém o usuário informado sobre o estado de cada consulta. \\
+\hline
+2. Compatibilidade com o Mundo Real & Termos clínicos usuais ("Anamnese", "CID-10", "Especialidade"). & Respeita a convenção e o vocabulário natural da área médica. \\
+\hline
+3. Prevenção de Erros & Exibição apenas dos horários livres e confirmação antes de assinar. & Previne agendamento duplo e envio incompleto de prontuário. \\
+\hline
+4. Reconhecimento em vez de Memorização & Menus de seleção com nomes dos médicos e horários explícitos. & Evita que o usuário precise memorizar códigos ou CRMs. \\
+\hline
+5. Estética Minimalista & Telas limpas, focadas nas ações primárias de cada perfil. & Agiliza a leitura e reduz a sobrecarga visual nas tarefas rotineiras. \\
+\hline
+\end{tabular}\\
+\autoria
+\end{table}

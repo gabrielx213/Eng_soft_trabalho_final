@@ -1,0 +1,158 @@
+\section{MODELAGEM UML}
+
+Esta seção apresenta a modelagem visual do sistema \textbf{MedAgenda} utilizando a Linguagem de Modelagem Unificada (UML). Os diagramas foram projetados para cobrir os aspectos funcionais, estruturais e comportamentais do sistema, mantendo estrita rastreabilidade com os requisitos especificados na Seção 2.
+
+\subsection{Diagrama de Casos de Uso}
+
+O Diagrama de Casos de Uso apresenta as interações entre os atores externos e as funcionalidades oferecidas pelo sistema. Foram identificados três atores principais:
+\begin{itemize}
+    \item \textbf{Paciente}: Usuário final que busca agendar consultas, visualizar histórico e gerenciar seus dados.
+    \item \textbf{Médico}: Profissional de saúde responsável por atender consultas, gerenciar horários e registrar prontuários.
+    \item \textbf{Administrador}: Responsável pela gestão cadastral e geração de relatórios gerenciais da clínica.
+\end{itemize}
+
+A Tabela \ref{tab:cdu_desc} apresenta a especificação dos casos de uso modelados no sistema MedAgenda.
+
+\begin{table}[H]
+\centering
+\caption{Especificação do Diagrama de Casos de Uso.}
+\label{tab:cdu_desc}
+\begin{tabular}{|c|l|c|l|}
+\hline
+\textbf{ID} & \textbf{Caso de Uso} & \textbf{Ator Principal} & \textbf{Relacionamentos} \\
+\hline
+CDU-01 & Cadastrar Paciente & Paciente & Nenhum \\
+\hline
+CDU-02 & Realizar Login & Todos & Nenhum \\
+\hline
+CDU-03 & Agendar Consulta & Paciente & \textit{<<include>>} CDU-02 \\
+\hline
+CDU-04 & Cancelar Consulta & Paciente & \textit{<<include>>} CDU-02 \\
+\hline
+CDU-05 & Visualizar Agenda & Médico & \textit{<<include>>} CDU-02 \\
+\hline
+CDU-06 & Registrar Prontuário & Médico & \textit{<<include>>} CDU-05 \\
+\hline
+CDU-07 & Pesquisar Médicos & Paciente & Nenhum \\
+\hline
+CDU-08 & Enviar Lembrete & Sistema (Tempo) & Nenhum \\
+\hline
+CDU-09 & Cadastrar Médico & Administrador & \textit{<<include>>} CDU-02 \\
+\hline
+CDU-10 & Gerar Relatórios & Administrador & \textit{<<include>>} CDU-02 \\
+\hline
+CDU-11 & Visualizar Histórico & Paciente & \textit{<<include>>} CDU-02 \\
+\hline
+CDU-12 & Gerenciar Horários & Médico & \textit{<<include>>} CDU-02 \\
+\hline
+\end{tabular}\\
+\autoria
+\end{table}
+
+\subsection{Diagrama de Classes}
+
+O Diagrama de Classes define a estrutura estática do MedAgenda, detalhando as classes essenciais do domínio, seus atributos principais, operações e relacionamentos:
+
+\begin{itemize}
+    \item \textbf{Usuario (Classe Abstrata)}
+    \begin{itemize}
+        \item \textit{Atributos}: \texttt{- id: int}, \texttt{- nome: String}, \texttt{- email: String}, \texttt{- senhaHash: String}
+        \item \textit{Métodos}: \texttt{+ login(senha: String): bool}, \texttt{+ logout(): void}
+    \end{itemize}
+    \item \textbf{Paciente (Herda de Usuario)}
+    \begin{itemize}
+        \item \textit{Atributos}: \texttt{- cpf: String}, \texttt{- dataNascimento: Date}, \texttt{- telefone: String}
+        \item \textit{Métodos}: \texttt{+ agendarConsulta(...): Consulta}, \texttt{+ cancelarConsulta(id: int): bool}
+    \end{itemize}
+    \item \textbf{Medico (Herda de Usuario)}
+    \begin{itemize}
+        \item \textit{Atributos}: \texttt{- crm: String}, \texttt{- especialidade: String}, \texttt{- valorConsulta: float}
+        \item \textit{Métodos}: \texttt{+ gerenciarHorarios(): void}, \texttt{+ registrarProntuario(...): Prontuario}
+    \end{itemize}
+    \item \textbf{Administrador (Herda de Usuario)}
+    \begin{itemize}
+        \item \textit{Atributos}: \texttt{- nivelAcesso: int}
+        \item \textit{Métodos}: \texttt{+ cadastrarMedico(m: Medico): bool}, \texttt{+ gerarRelatorio(tipo: String): Relatorio}
+    \end{itemize}
+    \item \textbf{Consulta}
+    \begin{itemize}
+        \item \textit{Atributos}: \texttt{- id: int}, \texttt{- dataHora: DateTime}, \texttt{- status: String}, \texttt{- observacao: String}
+        \item \textit{Métodos}: \texttt{+ confirmar(): void}, \texttt{+ cancelar(motivo: String): void}, \texttt{+ concluir(): void}
+    \end{itemize}
+    \item \textbf{Prontuario}
+    \begin{itemize}
+        \item \textit{Atributos}: \texttt{- id: int}, \texttt{- anamnese: String}, \texttt{- diagnostico: String}, \texttt{- prescricao: String}
+        \item \textit{Métodos}: \texttt{+ assinarDigitalmente(): bool}, \texttt{+ obterResumo(): String}
+    \end{itemize}
+    \item \textbf{HorarioDisponivel}
+    \begin{itemize}
+        \item \textit{Atributos}: \texttt{- id: int}, \texttt{- diaSemana: int}, \texttt{- horaInicio: Time}, \texttt{- ativo: bool}
+        \item \textit{Métodos}: \texttt{+ bloquear(): void}, \texttt{+ liberar(): void}
+    \end{itemize}
+\end{itemize}
+
+\textbf{Principais Relacionamentos e Multiplicidades:}
+\begin{itemize}
+    \item \textbf{Paciente (1) para (0..* ) Consulta}: Um paciente pode possuir várias consultas associadas.
+    \item \textbf{Medico (1) para (0..* ) Consulta}: Um médico atende diversas consultas ao longo de sua agenda.
+    \item \textbf{Consulta (1) para (0..1) Prontuario}: Cada consulta concluída compõe exatamente um prontuário clínico (composição).
+    \item \textbf{Medico (1) para (1..* ) HorarioDisponivel}: Um médico gerencia um conjunto de horários para agendamento.
+\end{itemize}
+
+\subsection{Diagramas de Sequência}
+
+Os Diagramas de Sequência ilustram a troca de mensagens entre os objetos do sistema para realizar os fluxos mais relevantes:
+
+\subsubsection{DS-01: Agendamento de Consulta (Atende ao RF-03)}
+\begin{enumerate}
+    \item O \textbf{Paciente} seleciona especialidade, médico, data e horário na interface.
+    \item O \texttt{ConsultaController} verifica a disponibilidade no \texttt{HorarioService}.
+    \item Sendo válido, o \texttt{ConsultaController} instancia uma nova \texttt{Consulta} com status \texttt{AGENDADA}.
+    \item O \texttt{ConsultaRepository} persiste o agendamento no banco de dados.
+    \item O sistema aciona o \texttt{NotificacaoService} para confirmar o agendamento ao paciente.
+\end{enumerate}
+
+\subsubsection{DS-02: Cancelamento de Consulta (Atende ao RF-04)}
+\begin{enumerate}
+    \item O \textbf{Paciente} solicita o cancelamento da consulta informando o motivo.
+    \item O \texttt{ConsultaController} verifica se o cancelamento respeita a antecedência mínima de 24 horas.
+    \item Em caso positivo, o status da consulta é alterado para \texttt{CANCELADA}.
+    \item O horário correspondente é liberado para novos agendamentos em \texttt{HorarioDisponivel}.
+    \item O \texttt{NotificacaoService} envia o aviso de cancelamento para paciente e médico.
+\end{enumerate}
+
+\subsubsection{DS-03: Autenticação no Sistema (Atende ao RF-02)}
+\begin{enumerate}
+    \item O usuário submete e-mail e senha na tela de login.
+    \item O \texttt{AuthService} busca o usuário no banco de dados e valida o hash da senha.
+    \item Em caso de sucesso, gera e retorna uma sessão segura para o usuário com seu respectivo perfil de acesso.
+\end{enumerate}
+
+\subsection{Diagramas de Gráficos de Estado}
+
+A modelagem comportamental de estados descreve o ciclo de vida dos objetos fundamentais do negócio:
+
+\subsubsection{1. Ciclo de Vida do Objeto \texttt{Consulta}}
+\begin{itemize}
+    \item \textbf{AGENDADA}: Estado inicial criado ao finalizar a solicitação do paciente.
+    \item \textbf{CONFIRMADA}: Transição disparada quando a consulta está confirmada para atendimento.
+    \item \textbf{CANCELADA}: Transição possível a partir de \texttt{AGENDADA} ou \texttt{CONFIRMADA}, desde que respeitada a regra de 24 horas.
+    \item \textbf{EM\_ANDAMENTO}: Consulta iniciada no consultório médico no horário marcado.
+    \item \textbf{CONCLUIDA}: Estado final alcançado após o preenchimento obrigatório e assinatura do prontuário médico.
+\end{itemize}
+
+\subsubsection{2. Ciclo de Vida do Objeto \texttt{Paciente}}
+\begin{itemize}
+    \item \textbf{INATIVO}: Cadastro criado aguardando verificação por e-mail.
+    \item \textbf{ATIVO}: Conta confirmada e apta para realizar agendamentos.
+    \item \textbf{BLOQUEADO}: Estado acionado em caso de ausências reiteradas sem justificativa prévia.
+\end{itemize}
+
+\subsection{Diagrama de Componentes e Implantação}
+
+A arquitetura de implantação do sistema organiza-se em três camadas principais interconectadas via protocolos padrão:
+\begin{itemize}
+    \item \textbf{Apresentação (Cliente Web)}: Aplicação Frontend executada no navegador do usuário, comunicando-se via HTTPS com a API REST.
+    \item \textbf{Aplicação (Servidor Backend)}: Módulos de controle, serviços (\texttt{ConsultaService}, \texttt{ProntuarioService}, \texttt{AuthService}) e lógica de negócios executados no servidor.
+    \item \textbf{Persistência (Banco de Dados)}: Banco de dados relacional PostgreSQL armazenando cadastros, consultas, prontuários e históricos com integridade e segurança.
+\end{itemize}

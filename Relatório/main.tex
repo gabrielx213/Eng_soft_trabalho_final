@@ -1,0 +1,81 @@
+\documentclass[a4paper, 12pt]{article}
+
+% === MARGENS ===
+\usepackage[left=3cm, top=3cm, right=2cm, bottom=2cm]{geometry}
+
+% === CODIFICAÇÃO E IDIOMA ===
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil]{babel}
+
+% === FONTES E TIPOGRAFIA ===
+\usepackage{setspace}
+\usepackage{indentfirst}
+\setlength{\parindent}{1cm}
+
+% === IMAGENS E FIGURAS ===
+\usepackage{graphicx}
+\usepackage{float}
+
+% === TABELAS ===
+\usepackage{array}
+\usepackage{booktabs}
+
+% === MATEMÁTICA ===
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+% === CABEÇALHO ===
+\pagestyle{myheadings}
+
+% === REFERÊNCIAS ABNT ===
+\usepackage[alf,abnt-repeated-title-omit=yes,abnt-emphasize=bf,abnt-etal-list=0]{abntex2cite}
+
+% === COMANDOS PERSONALIZADOS ===
+\include{comand}
+
+% =============================================
+\begin{document}
+
+% --- Pré-textuais ---
+\include{0.pretext}
+
+% --- Seção 1: Introdução ---
+\include{1.introducao}
+
+% --- Seção 2: Revisão dos Requisitos ---
+\include{2.requisitos}
+
+% --- Seção 3: Modelagem UML ---
+\include{3.modelagem}
+
+% --- Seção 4: Projeto de Software e Arquitetura ---
+\include{4.arquitetura}
+
+% --- Seção 5: Projeto Orientado a Objetos ---
+\include{5.poo}
+
+% --- Seção 6: Verificação, Validação e Teste ---
+\include{6.testes}
+
+% --- Seção 7: Projeto de Interface e Usabilidade ---
+\include{7.interface}
+
+% --- Seção 8: Conclusão ---
+\include{8.conclusao}
+
+% --- Seção 9: Declaração de Uso de IA ---
+\include{9.ia}
+
+% --- Seção 10: Divisão de Responsabilidades ---
+\include{10.responsabilidades}
+
+% --- Seção 11: Referências ---
+\newpage
+\addcontentsline{toc}{section}{REFERÊNCIAS}
+\nocite{*}
+\bibliographystyle{abntex2-alf}
+\bibliography{referencias}
+
+\end{document}

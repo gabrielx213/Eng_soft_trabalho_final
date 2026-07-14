@@ -1,0 +1,97 @@
+\section{VERIFICAÇÃO, VALIDAÇÃO E TESTE}
+
+\subsection{Parte 1: Estratégia de Testes}
+
+A estratégia de testes do MedAgenda é dividida em quatro níveis fundamentais para garantir o correto funcionamento e a qualidade do software \cite{myers2011}:
+
+\subsubsection{1. Testes de Unidade}
+\begin{itemize}
+    \item \textbf{Objetivo}: Validar a precisão de funções e métodos isolados da aplicação.
+    \item \textbf{O que será testado}: Validação de formato de e-mail e CPF, e verificação da regra de antecedência mínima de 24 horas no cancelamento.
+    \item \textbf{Justificativa}: Permite detectar falhas lógicas rapidamente e com baixo custo de correção.
+\end{itemize}
+
+\subsubsection{2. Testes de Integração}
+\begin{itemize}
+    \item \textbf{Objetivo}: Verificar a comunicação correta entre os serviços do sistema e o banco de dados.
+    \item \textbf{O que será testado}: Integração entre \texttt{ConsultaService} e o banco de dados PostgreSQL, além da comunicação com o serviço de e-mail.
+    \item \textbf{Justificativa}: Garante que os módulos colaboram sem erros de inconsistência de dados.
+\end{itemize}
+
+\subsubsection{3. Testes de Sistema}
+\begin{itemize}
+    \item \textbf{Objetivo}: Avaliar o funcionamento global da aplicação completa em ambiente homologado.
+    \item \textbf{O que será testado}: Fluxo completo de agendamento, cancelamento, login e emissão de relatórios.
+    \item \textbf{Justificativa}: Comprova que o sistema cumpre todos os requisitos funcionais e não funcionais contratados.
+\end{itemize}
+
+\subsubsection{4. Testes de Aceitação}
+\begin{itemize}
+    \item \textbf{Objetivo}: Validar se o sistema atende adequadamente às rotinas diárias dos usuários finais.
+    \item \textbf{O que será testado}: Facilidade de agendamento por pacientes e clareza da agenda visual dos médicos.
+    \item \textbf{Justificativa}: Assegura a utilidade prática e a satisfação do usuário.
+\end{itemize}
+
+\subsection{Parte 2: Casos de Teste}
+
+A Tabela \ref{tab:casos_teste} apresenta os casos de teste elaborados para os requisitos funcionais prioritários do sistema.
+
+\begin{table}[H]
+\centering
+\caption{Casos de Teste prioritários do sistema MedAgenda.}
+\label{tab:casos_teste}
+\begin{tabular}{|c|c|p{3.5cm}|p{3.5cm}|p{3.8cm}|}
+\hline
+\textbf{ID} & \textbf{RF} & \textbf{Objetivo} & \textbf{Entrada} & \textbf{Resultado Esperado} \\
+\hline
+CT-01 & RF-01 & Validar cadastro de paciente & Nome, CPF e e-mail válidos & Cadastro salvo com sucesso e confirmação exibida. \\
+\hline
+CT-02 & RF-02 & Validar bloqueio de login incorreto & E-mail correto e senha errada & Login negado e mensagem de erro exibida. \\
+\hline
+CT-03 & RF-03 & Validar agendamento de consulta & Médico, data futura e horário livre & Consulta agendada com status AGENDADA. \\
+\hline
+CT-04 & RF-04 & Validar regra de cancelamento & Tentativa de cancelar com menos de 24h & Cancelamento bloqueado com aviso da regra. \\
+\hline
+CT-05 & RF-05 & Validar visualização da agenda & Médico acessa agenda do dia & Exibição correta das consultas marcadas. \\
+\hline
+CT-06 & RF-06 & Validar registro de prontuário & Preenchimento de anamnese e diagnóstico & Prontuário salvo e consulta concluída. \\
+\hline
+CT-07 & RF-08 & Validar envio de lembrete & Simulação de 24h antes da consulta & E-mail de lembrete enviado ao paciente. \\
+\hline
+CT-08 & RF-11 & Validar histórico do paciente & Acesso à aba Meu Histórico & Listagem cronológica das consultas realizadas. \\
+\hline
+\end{tabular}\\
+\autoria
+\end{table}
+
+\subsection{Parte 3: Matriz de Rastreabilidade de Requisitos para Casos de Teste}
+
+A Tabela \ref{tab:matriz_testes} relaciona cada requisito funcional ao seu respectivo caso de teste.
+
+\begin{table}[H]
+\centering
+\caption{Matriz de Rastreabilidade Requisitos $\times$ Casos de Teste.}
+\label{tab:matriz_testes}
+\begin{tabular}{|c|l|c|}
+\hline
+\textbf{Requisito Funcional (RF)} & \textbf{Descrição Resumida} & \textbf{Caso de Teste} \\
+\hline
+RF-01 & Cadastro de Paciente & CT-01 \\
+\hline
+RF-02 & Autenticação de Usuários & CT-02 \\
+\hline
+RF-03 & Agendamento de Consulta & CT-03 \\
+\hline
+RF-04 & Cancelamento de Consulta & CT-04 \\
+\hline
+RF-05 & Visualização de Agenda Médica & CT-05 \\
+\hline
+RF-06 & Registro de Prontuário & CT-06 \\
+\hline
+RF-08 & Notificação de Lembrete & CT-07 \\
+\hline
+RF-11 & Visualização de Histórico & CT-08 \\
+\hline
+\end{tabular}\\
+\autoria
+\end{table}

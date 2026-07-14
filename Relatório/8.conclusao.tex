@@ -1,0 +1,28 @@
+\section{CONCLUSÃO}
+
+\subsection{Síntese das Decisões de Projeto}
+
+O presente Trabalho Final consolidou a concepção de um sistema web de gestão clínica integral, o \textbf{MedAgenda}, abordando todas as fases que constituem o projeto arquitetural e de software. Entre as principais decisões de projeto consolidadas neste documento, destacam-se:
+\begin{itemize}
+    \item \textbf{Modelagem Comportamental e Estática}: A especificação de 12 Requisitos Funcionais e 6 Não Funcionais serviu como alicerce para uma modelagem UML completa e rastreável, integrando Casos de Uso, Diagramas de Classes, Sequência, Estados e Componentes.
+    \item \textbf{Arquitetura e Coesão}: A escolha da arquitetura em camadas com padrão MVC separou claramente a apresentação em React do núcleo transacional em Node.js e PostgreSQL. A análise técnica comprovou a obtenção de alta coesão funcional em serviços essenciais como \texttt{ConsultaService} e o desacoplamento de serviços auxiliares via Injeção de Dependência.
+    \item \textbf{Qualidade e Usabilidade}: O plano de verificação e teste estruturou 8 casos de teste diretamente amarrados aos requisitos fundamentais, enquanto o projeto de interface priorizou os princípios humanistas e as heurísticas de usabilidade de Jakob Nielsen, com foco na prevenção de erros operacionais em ambiente médico.
+\end{itemize}
+
+\subsection{Limitações Identificadas}
+
+Durante o desenvolvimento do documento de projeto, identificaram-se algumas limitações intrínsecas ao escopo acadêmico do trabalho:
+\begin{itemize}
+    \item \textbf{Ausência de Prototipação de Alta Fidelidade Interativa}: Por tratar-se de um Documento de Projeto focado em especificações estruturais e wireframes de média fidelidade no relatório, não foi produzido um protótipo clicável dinâmico para testes formais com usuários reais.
+    \item \textbf{Integração com Sistemas Legados da Saúde}: O modelo assume o funcionamento autônomo da clínica, sem contemplar integração em tempo real com sistemas externos ou redes hospitalares públicas.
+    \item \textbf{Modelagem Simplificada de Faturamento}: O projeto priorizou os fluxos centrais de agendamento e prontuário, deixando aspectos aprofundados de faturamento de convênios médicos como extensões futuras.
+\end{itemize}
+
+\subsection{Lições Aprendidas}
+
+A elaboração deste Documento de Projeto proporcionou ao grupo aprendizados significativos sobre a Engenharia de Software na prática:
+\begin{itemize}
+    \item \textbf{Importância da Rastreabilidade}: Constatou-se que manter o vínculo formal entre cada requisito funcional, diagrama UML correspondente e caso de teste é fundamental para evitar lacunas na especificação e garantir que nenhum requisito fique sem cobertura ou validação.
+    \item \textbf{O Valor do Desacoplamento Arquitetural}: Compreendeu-se que o uso consciente de princípios de projeto, em especial a Inversão de Dependência, simplifica a evolução do sistema e a criação de testes automatizados.
+    \item \textbf{Usabilidade como Requisito Crítico}: A experiência reforçou que em sistemas críticos como o de saúde, a usabilidade e a prevenção de erros na interface são tão vitais quanto o desempenho computacional da aplicação.
+\end{itemize}
