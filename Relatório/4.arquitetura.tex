@@ -2,68 +2,112 @@
 
 \subsection{Padrão Arquitetural Escolhido}
 
-Para o desenvolvimento do sistema \textbf{MedAgenda}, adotou-se a arquitetura em \textbf{Camadas (\textit{Layered Architecture})} combinada com o padrão \textbf{MVC (\textit{Model-View-Controller})}, onde a interface Web se comunica via API RESTful com o servidor de aplicação \cite{martin2019}.
+Para o desenvolvimento do sistema \textbf{MedAgenda}, adotou-se a arquitetura em \textbf{Camadas (\textit{Layered Architecture})} combinada com o padrão \textbf{MVC (\textit{Model-View-Controller})}, onde a interface Web se comunica por meio de uma API RESTful padronizada com o servidor transacional de aplicação \cite{martin2019, fowler2002}.
 
 \subsection{Justificativa Técnica da Escolha Arquitetural}
 
-A escolha pela arquitetura em camadas orientada a serviços justifica-se pelos seguintes critérios técnicos:
+A escolha pela arquitetura em camadas orientada a serviços e separada do cliente justifica-se pelos seguintes critérios técnicos consolidados na Engenharia de Software:
 \begin{itemize}
-    \item \textbf{Separação de Responsabilidades}: O isolamento entre a camada de apresentação (Frontend), lógica de negócio (Services/Controllers) e persistência de dados (Repositories) simplifica a manutenção e a evolução do sistema.
-    \item \textbf{Segurança}: Por lidar com dados médicos sigilosos, a segregação de camadas permite aplicar autenticação, validação e controle de acesso antes de qualquer interação com o banco de dados.
-    \item \textbf{Testabilidade}: O desacoplamento viabiliza a criação de testes automatizados independentes para as regras de agendamento.
+    \item \textbf{Separação Estrita de Responsabilidades}: O isolamento entre a camada de apresentação (Frontend SPA), a lógica de negócios e regras transacionadoras (Services/Controllers) e a persistência física de dados (Repositories) simplifica a manutenção preventiva, evolutiva e o desacoplamento de módulos do sistema \cite{martin2019}.
+    \item \textbf{Segurança e Criptografia em Camadas}: Por lidar com dados médicos sigilosos protegidos por regulamentações como a LGPD, a segregação de camadas permite aplicar rotinas de autenticação JWT, validações parciais, higienização de entradas e controle rigoroso de autorização (RBAC) antes de qualquer interação com o banco de dados \cite{silberschatz2020}.
+    \item \textbf{Testabilidade Isolada}: O desacoplamento viabiliza a criação de testes de unidade e integração automatizados e independentes, permitindo simular o banco de dados via objetos falsos (\textit{Mocks}) para homologar as regras lógicas de agendamento e cancelamento \cite{myers2011}.
 \end{itemize}
 
 \subsection{Tecnologias Selecionadas e Justificativas}
 
-A Tabela \ref{tab:tecnologias} sumariza a pilha tecnológica selecionada para o sistema MedAgenda.
+A Tabela \ref{tab:tecnologias} sumariza a pilha tecnológica selecionada para o ecossistema MedAgenda e suas respectivas justificativas de adoção no projeto.
 
 \begin{table}[H]
 \centering
+\small
 \caption{Tecnologias selecionadas e justificativas técnicas.}
 \label{tab:tecnologias}
-\begin{tabular}{|c|c|p{8.5cm}|}
+\begin{tabularx}{\textwidth}{|>{\RaggedRight\arraybackslash}p{3cm}|>{\RaggedRight\arraybackslash}p{3.2cm}|>{\RaggedRight\arraybackslash}X|}
 \hline
-\textbf{Camada} & \textbf{Tecnologia} & \textbf{Justificativa Técnica} \\
+\textbf{Camada} & \textbf{Tecnologia} & \textbf{Justificativa Técnica e Arquitetural} \\
 \hline
-Frontend & React.js & Interface interativa, modular baseada em componentes reutilizáveis e excelente experiência de uso. \\
+Frontend (SPA e Dashboard) & React.js + Vite & Ferramenta moderna de build ultra-rápida e scaffolding (Vite) acoplada à biblioteca reativa React.js para a criação de um dashboard interativo, modularizado por componentes independentes e com renderização otimizada \cite{react2023}. \\
 \hline
-Backend & Node.js / Express & Alta eficiência no tratamento de requisições assíncronas e facilidade de integração via API REST. \\
+Backend & Node.js / Express & Alta eficiência no tratamento de requisições assíncronas não-bloqueantes (I/O assíncrono) e facilidade na estruturação e padronização de rotas de uma API RESTful \cite{bassi2015}. \\
 \hline
-Banco de Dados & PostgreSQL & Sistema relacional estável, seguro e com rigorosa conformidade ACID para dados de saúde. \\
+Banco de Dados & PostgreSQL & Sistema gerenciador relacional maduro, altamente estável, seguro e com conformidade estrita com os padrões transacionadores ACID para preservação da integridade clínica \cite{silberschatz2020}. \\
 \hline
-ORM & Prisma & Acesso a dados seguro e tipado, prevenindo falhas de injeção SQL. \\
+ORM & Prisma Client & Ferramenta de mapeamento objeto-relacional com tipagem estática e acesso seguro aos dados, prevenindo proativamente falhas críticas de injeção SQL \cite{prisma2023}. \\
 \hline
-\end{tabular}\\
+Containerização & Docker / Docker Compose & Empacotamento isolado, reprodutível e orquestrado de todos os serviços cooperativos (Frontend React, Backend Node.js e Banco PostgreSQL) para execução padronizada em comando único \cite{docker2023, burns2018}. \\
+\hline
+\end{tabularx}\\
 \autoria
 \end{table}
 
+\subsection{Estratégia de Containerização e Orquestração (Docker e Docker Compose)}
+
+A garantia de portabilidade, reprodutibilidade e isolamento operacional é um dos pilares mais fundamentais da Engenharia de Software moderna e de DevOps \cite{burns2018}. Para assegurar que o sistema \textbf{MedAgenda} possa ser implantado, testado e validado de maneira matematicamente idêntica em qualquer ambiente computacional (Windows, Linux ou macOS) sem conflitos de versões ou dependências locais, adotou-se a containerização integral da aplicação por meio da plataforma \textbf{Docker} orquestrada transacionalmente via \textbf{Docker Compose} \cite{docker2023}.
+
+A arquitetura de containerização foi estruturada sobre uma rede virtual interna isolada (\texttt{medagenda-network}), compondo três serviços cooperativos e independentes:
+
+\subsubsection{1. Container de Persistência (\texttt{medagenda-postgres})}
+\begin{itemize}
+    \item \textbf{Imagem Base}: \texttt{postgres:16-alpine} (distribuição Linux enxuta, otimizada e com superfície reduzida de vulnerabilidades).
+    \item \textbf{Função e Isolamento}: Encapsula o servidor de banco de dados relacional PostgreSQL, mantendo os arquivos físicos de armazenamento em um volume persistente do sistema hospedeiro (\texttt{postgres\_data}), isolado do ciclo de vida efêmero do container.
+    \item \textbf{Verificação de Saúde (\textit{Healthcheck})}: Implementa uma rotina de monitoramento inteligente (\texttt{pg\_isready}) que informa continuamente ao orquestrador o instante exato em que o servidor relacional está 100\% íntegro e aceitando conexões na porta 5432.
+\end{itemize}
+
+\subsubsection{2. Container do Servidor de Aplicação (\texttt{medagenda-backend})}
+\begin{itemize}
+    \item \textbf{Imagem Base}: \texttt{node:20-alpine}.
+    \item \textbf{Orquestração e Automação de Carga}: O serviço é condicionado diretamente à aprovação do \textit{Healthcheck} do banco de dados (\texttt{depends\_on: condition: service\_healthy}). Ao inicializar no container, executa automaticamente uma sequência de bootstrap transacional:
+    \begin{enumerate}
+        \item \textbf{Sincronização de Schema}: Aplica as definições e migrações do modelo relacional via Prisma ORM (\texttt{npx prisma db push}) sem necessidade de comandos manuais.
+        \item \textbf{Povoamento Inicial (\textit{Seeding})}: Executa o script de carga inicial (\texttt{node prisma/seed.js}), cadastrando automaticamente os perfis de teste da clínica (Paciente Maria Silva, Cardiologista Dr. Carlos Eduardo, Dermatologista Dra. Gabriela Xavier e Administrador Geral) e agendamentos históricos.
+        \item \textbf{Inicialização da API REST}: Sobe o serviço Node.js/Express na porta 5000 provendo as rotas e regras de domínio da aplicação.
+    \end{enumerate}
+\end{itemize}
+
+\subsubsection{3. Container da Interface de Apresentação (\texttt{medagenda-frontend})}
+\begin{itemize}
+    \item \textbf{Técnica de \textit{Multi-Stage Build}}: O Dockerfile do frontend aplica compilação modular em dois estágios distintos para maximizar o desempenho e a segurança:
+    \begin{itemize}
+        \item \textit{Estágio de Build (\texttt{node:20-alpine})}: Instala as dependências de desenvolvimento, processa os módulos e compila a Single Page Application (SPA) em React.js + Vite, gerando unicamente o pacote de arquivos estáticos minificados e otimizados para produção (\texttt{dist/}).
+        \item \textit{Estágio de Produção (\texttt{nginx:alpine})}: Descarta todas as ferramentas de compilação, pacotes intermediários e código-fonte bruto, embarcando exclusivamente os artefatos estáticos otimizados em um servidor Web Nginx ultraleve.
+    \end{itemize}
+    \item \textbf{Roteamento SPA e Proxy Reverso}: O servidor Nginx interno é configurado com a diretiva \texttt{try\_files} para suportar o roteamento de páginas de uma SPA interativa sem causar erros de página 404. Adicionalmente, atua como proxy reverso para as chamadas à rota \texttt{/api}, interceptando as requisições do navegador e encaminhando-as para o container do backend (\texttt{http://backend:5000/api}) na rede interna do Docker, eliminando bloqueios por CORS e simplificando o acesso externo na porta 80.
+\end{itemize}
+
+\subsubsection{4. Vantagens Arquiteturais e Execução Simplificada}
+A adoção do Docker na arquitetura do MedAgenda confere rigor acadêmico e excelência operacional ao projeto:
+\begin{itemize}
+    \item \textbf{Execução em Comando Único}: A totalidade do sistema fullstack (Banco de Dados, API REST e Dashboard React) é inicializada a partir de um único comando (\texttt{docker compose up --build}), eliminando a complexidade de configuração de ambiente e permitindo que qualquer avaliador verifique os requisitos em segundos.
+    \item \textbf{Desacoplamento e Imutabilidade}: Cada camada roda no seu próprio ambiente isolado com recursos controlados, assegurando que modificações na interface ou no servidor Node.js jamais comprometam a estabilidade e a persistência do banco relacional.
+\end{itemize}
+
 \subsection{Análise de Coesão}
 
-A coesão mensura o grau em que as responsabilidades de uma classe estão funcionalmente interrelacionadas. Avaliam-se duas classes centrais:
+A coesão mensura o grau em que as responsabilidades internas de uma classe, módulo ou serviço estão funcionalmente e logicamente interrelacionadas \cite{larman2004}. Avaliam-se duas classes centrais do ecossistema:
 
 \subsubsection{1. Classe \texttt{ConsultaService}: Coesão Funcional (Alta Coesão)}
 \begin{itemize}
-    \item \textbf{Responsabilidade}: Encapsular exclusivamente as regras de negócio relativas a agendamento e cancelamento de consultas médicas.
-    \item \textbf{Avaliação}: Apresenta \textbf{Coesão Funcional} (nível mais elevado na Engenharia de Software), pois todos os seus métodos cooperam diretamente para o mesmo objetivo de negócio coeso.
+    \item \textbf{Responsabilidade}: Encapsular exclusivamente as regras de negócio relativas a agendamento, validação de horários livres e cancelamento temporal de consultas médicas.
+    \item \textbf{Avaliação}: Apresenta \textbf{Coesão Funcional} (o grau mais elevado na taxonomia de Engenharia de Software), pois todos os seus atributos e métodos cooperam coesamente para a realização de um único objetivo transacional primário do domínio \cite{larman2004}.
 \end{itemize}
 
 \subsubsection{2. Classe \texttt{RelatorioController}: Coesão Comunicacional}
 \begin{itemize}
-    \item \textbf{Responsabilidade}: Processar requisições de relatórios gerenciais sobre consultas e taxas de ocupação da clínica.
-    \item \textbf{Avaliação}: Apresenta \textbf{Coesão Comunicacional}, uma vez que seus métodos utilizam os mesmos dados de entrada para gerar diferentes relatórios consolidados.
+    \item \textbf{Responsabilidade}: Processar requisições de relatórios gerenciais sobre o volume de consultas, cancelamentos e taxas de ocupação da clínica.
+    \item \textbf{Avaliação}: Apresenta \textbf{Coesão Comunicacional}, uma vez que seus diferentes métodos de geração utilizam as mesmas estruturas de dados e consultas transacionais para consolidar relatórios estatísticos variados para a gestão \cite{pressman2016}.
 \end{itemize}
 
 \subsection{Análise de Acoplamento e Propostas de Melhoria}
 
-O acoplamento mede a força de interconexão entre módulos do sistema:
+O acoplamento quantifica a força de interconexão e dependência direta entre módulos e classes do sistema \cite{larman2004}:
 
 \subsubsection{1. Dependência: \texttt{ConsultaController} para \texttt{ConsultaService}}
 \begin{itemize}
-    \item \textbf{Classificação}: \textbf{Acoplamento de Dados (Baixo Acoplamento)}. O controlador comunica-se com o serviço passando apenas estruturas de dados simples (parâmetros da consulta).
-    \item \textbf{Avaliação}: Excelente escolha de projeto, mantendo os controladores independentes de detalhes internos de banco de dados.
+    \item \textbf{Classificação}: \textbf{Acoplamento de Dados (Baixo Acoplamento)}. O controlador comunica-se com o serviço passando apenas estruturas de dados primitivas e parâmetros de consulta (como identificador do paciente, do médico e data/hora solicitada).
+    \item \textbf{Avaliação}: Excelente escolha de projeto arquitetural, mantendo os controladores totalmente desacoplados da lógica complexa transacional e de detalhes internos de persistência relacional.
 \end{itemize}
 
 \subsubsection{2. Dependência: \texttt{ConsultaService} para \texttt{NotificacaoService}}
 \begin{itemize}
-    \item \textbf{Situação e Melhoria}: Para evitar que o serviço de consulta dependa diretamente de uma implementação concreta de envio de e-mail, aplica-se a \textbf{Injeção de Dependência} \cite{gamma1995}. A classe \texttt{ConsultaService} passa a depender de uma interface abstrata \texttt{INotificador}, permitindo alterar o canal de notificação (e-mail, SMS ou WhatsApp) sem modificar as regras de agendamento.
+    \item \textbf{Situação e Proposta de Melhoria}: Para impedir que o serviço transacional de consulta dependa rigidamente de uma implementação concreta de disparo de e-mails ou SMS, aplica-se o padrão de \textbf{Injeção de Dependência} com Inversão de Controle \cite{gamma1995, martin2019}. A classe \texttt{ConsultaService} passa a depender exclusivamente de uma interface abstrata (\texttt{INotificador}). Assim, ao alterar o canal de notificação (para e-mail, WhatsApp ou SMS), o núcleo transacional de agendamento permanece inalterado e protegido contra regressões.
 \end{itemize}

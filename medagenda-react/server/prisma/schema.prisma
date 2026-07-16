@@ -1,0 +1,94 @@
+// Prisma Schema - Banco de Dados Relacional PostgreSQL
+// Projeto: MedAgenda - Sistema Completo de Agendamento e Prontuário Médico
+// Integrantes:
+// - Carlos Eduardo Vitelli da Silva (202406840030)
+// - Gabriel Xavier Vieira do Nascimento (202007040030)
+// - Kayky Gonçalves Feio (202406840021)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senhaHash String
+  role      String   // "paciente", "medico", "admin"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relações com especializações 1 para 1
+  paciente      Paciente?
+  medico        Medico?
+  administrador Administrador?
+}
+
+model Paciente {
+  id             Int        @id @default(autoincrement())
+  usuarioId      Int        @unique
+  usuario        Usuario    @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  cpf            String     @unique
+  dataNascimento String
+  telefone       String
+  endereco       String?
+  consultas      Consulta[]
+}
+
+model Medico {
+  id               Int                 @id @default(autoincrement())
+  usuarioId        Int                 @unique
+  usuario          Usuario             @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  crm              String              @unique
+  especialidade    String
+  valorConsulta    Float               @default(250.00)
+  consultas        Consulta[]
+  horariosDisponiveis HorarioDisponivel[]
+}
+
+model Administrador {
+  id          Int     @id @default(autoincrement())
+  usuarioId   Int     @unique
+  usuario     Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  nivelAcesso Int     @default(1)
+}
+
+model Consulta {
+  id          Int         @id @default(autoincrement())
+  pacienteId  Int
+  paciente    Paciente    @relation(fields: [pacienteId], references: [id], onDelete: Cascade)
+  medicoId    Int
+  medico      Medico      @relation(fields: [medicoId], references: [id], onDelete: Cascade)
+  dataHora    DateTime
+  status      String      // "AGENDADA", "CONFIRMADA", "CONCLUIDA", "CANCELADA"
+  observacao  String?
+  createdAt   DateTime    @default(now())
+
+  // Relação 1 para 0..1 com Prontuario (Composição)
+  prontuario  Prontuario?
+}
+
+model Prontuario {
+  id          Int      @id @default(autoincrement())
+  consultaId  Int      @unique
+  consulta    Consulta @relation(fields: [consultaId], references: [id], onDelete: Cascade)
+  anamnese    String
+  diagnostico String   // CID-10 e diagnóstico clínico
+  prescricao  String
+  dataRegistro DateTime @default(now())
+  assinado    Boolean  @default(true)
+}
+
+model HorarioDisponivel {
+  id         Int     @id @default(autoincrement())
+  medicoId   Int
+  medico     Medico  @relation(fields: [medicoId], references: [id], onDelete: Cascade)
+  diaSemana  Int     // 0=Domingo, 1=Segunda, ..., 6=Sábado
+  horaInicio String  // ex: "08:00"
+  ativo      Boolean @default(true)
+}

@@ -2,96 +2,98 @@
 
 \subsection{Parte 1: Estratégia de Testes}
 
-A estratégia de testes do MedAgenda é dividida em quatro níveis fundamentais para garantir o correto funcionamento e a qualidade do software \cite{myers2011}:
+A estratégia estruturada de testes do sistema \textbf{MedAgenda} é dividida em quatro níveis complementares, projetados segundo as diretrizes clássicas de verificação e validação de software para assegurar a conformidade transacional e a alta confiabilidade do ecossistema clínico \cite{myers2011, beizer1995}:
 
 \subsubsection{1. Testes de Unidade}
 \begin{itemize}
-    \item \textbf{Objetivo}: Validar a precisão de funções e métodos isolados da aplicação.
-    \item \textbf{O que será testado}: Validação de formato de e-mail e CPF, e verificação da regra de antecedência mínima de 24 horas no cancelamento.
-    \item \textbf{Justificativa}: Permite detectar falhas lógicas rapidamente e com baixo custo de correção.
+    \item \textbf{Objetivo do Nível}: Validar a precisão matemática e lógica de funções isoladas, algoritmos de validação e métodos puros das classes do domínio \cite{myers2011}.
+    \item \textbf{Escopo de Aplicação}: Verificação de expressões regulares para formato de e-mail corporativo e CPF, validação criptográfica de hashes de senha, e teste isolado da regra lógica de verificação de antecedência de 24 horas para cancelamento de agendamentos.
+    \item \textbf{Justificativa Técnica}: Permite isolar e corrigir precocemente falhas nas regras transacionais sem custo operacional de conexão ao banco de dados ou a servidores web.
 \end{itemize}
 
 \subsubsection{2. Testes de Integração}
 \begin{itemize}
-    \item \textbf{Objetivo}: Verificar a comunicação correta entre os serviços do sistema e o banco de dados.
-    \item \textbf{O que será testado}: Integração entre \texttt{ConsultaService} e o banco de dados PostgreSQL, além da comunicação com o serviço de e-mail.
-    \item \textbf{Justificativa}: Garante que os módulos colaboram sem erros de inconsistência de dados.
+    \item \textbf{Objetivo do Nível}: Homologar a comunicação e cooperação correta entre os diferentes módulos da aplicação, serviços de negócio e o repositório relacional \cite{beizer1995}.
+    \item \textbf{Escopo de Aplicação}: Verificação transacional da integração entre o \texttt{ConsultaService}, o Prisma Client e o banco de dados PostgreSQL real ou em memória, bem como a comunicação assíncrona com o serviço de envio de notificações \texttt{NotificacaoService}.
+    \item \textbf{Justificativa Técnica}: Assegura que os componentes modulares se integram sem causar corrupção referencial, falhas de I/O ou vazamento de conexões no banco.
 \end{itemize}
 
 \subsubsection{3. Testes de Sistema}
 \begin{itemize}
-    \item \textbf{Objetivo}: Avaliar o funcionamento global da aplicação completa em ambiente homologado.
-    \item \textbf{O que será testado}: Fluxo completo de agendamento, cancelamento, login e emissão de relatórios.
-    \item \textbf{Justificativa}: Comprova que o sistema cumpre todos os requisitos funcionais e não funcionais contratados.
+    \item \textbf{Objetivo do Nível}: Avaliar o comportamento global e transacional da aplicação executando de forma end-to-end sobre o ambiente orquestrado \cite{pressman2016}.
+    \item \textbf{Escopo de Aplicação}: Simulação de fluxos operacionais completos: cadastro de paciente, login com geração de sessão, agendamento de consulta de especialidade, registro clínico de prontuário com CID-10 pelo médico e geração de relatórios consolidados no painel administrativo.
+    \item \textbf{Justificativa Técnica}: Comprova de forma definitiva que o ecossistema fullstack atende estritamente a todos os requisitos funcionais e não funcionais contratados.
 \end{itemize}
 
 \subsubsection{4. Testes de Aceitação}
 \begin{itemize}
-    \item \textbf{Objetivo}: Validar se o sistema atende adequadamente às rotinas diárias dos usuários finais.
-    \item \textbf{O que será testado}: Facilidade de agendamento por pacientes e clareza da agenda visual dos médicos.
-    \item \textbf{Justificativa}: Assegura a utilidade prática e a satisfação do usuário.
+    \item \textbf{Objetivo do Nível}: Validar a utilidade prática, usabilidade e adequação do sistema às rotinas hospitalares e clínicas reais dos atores corporativos \cite{myers2011}.
+    \item \textbf{Escopo de Aplicação}: Execução de sessões de homologação com pacientes simulados para agendamento rápido em tablets, e validação da legibilidade e agilidade do painel diário de chamadas pelos profissionais médicos.
+    \item \textbf{Justificativa Técnica}: Garante que o produto entregue resolve efetivamente os problemas práticos da clínica médica com satisfação do usuário.
 \end{itemize}
 
 \subsection{Parte 2: Casos de Teste}
 
-A Tabela \ref{tab:casos_teste} apresenta os casos de teste elaborados para os requisitos funcionais prioritários do sistema.
+A Tabela \ref{tab:casos_teste} detalha a especificação dos casos de teste prioritários estruturados para homologar os requisitos funcionais centrais do sistema MedAgenda.
 
 \begin{table}[H]
 \centering
+\small
 \caption{Casos de Teste prioritários do sistema MedAgenda.}
 \label{tab:casos_teste}
-\begin{tabular}{|c|c|p{3.5cm}|p{3.5cm}|p{3.8cm}|}
+\begin{tabularx}{\textwidth}{|c|c|>{\RaggedRight\arraybackslash}p{3.6cm}|>{\RaggedRight\arraybackslash}X|>{\RaggedRight\arraybackslash}p{4cm}|}
 \hline
-\textbf{ID} & \textbf{RF} & \textbf{Objetivo} & \textbf{Entrada} & \textbf{Resultado Esperado} \\
+\textbf{ID} & \textbf{RF} & \textbf{Objetivo do Teste} & \textbf{Dados de Entrada} & \textbf{Resultado Esperado} \\
 \hline
-CT-01 & RF-01 & Validar cadastro de paciente & Nome, CPF e e-mail válidos & Cadastro salvo com sucesso e confirmação exibida. \\
+CT-01 & RF-01 & Validar cadastro inicial de paciente & Nome completo, CPF, data de nascimento e e-mail válidos & Cadastro persistido com sucesso e confirmação exibida em tela. \\
 \hline
-CT-02 & RF-02 & Validar bloqueio de login incorreto & E-mail correto e senha errada & Login negado e mensagem de erro exibida. \\
+CT-02 & RF-02 & Validar bloqueio de login com credencial inválida & E-mail cadastrado correto e senha incorreta & Autenticação negada, sessão não gerada e mensagem de erro exibida. \\
 \hline
-CT-03 & RF-03 & Validar agendamento de consulta & Médico, data futura e horário livre & Consulta agendada com status AGENDADA. \\
+CT-03 & RF-03 & Validar agendamento online de consulta & Seleção de médico da especialidade, data futura e horário livre & Consulta agendada, slot de horário reservado e status AGENDADA. \\
 \hline
-CT-04 & RF-04 & Validar regra de cancelamento & Tentativa de cancelar com menos de 24h & Cancelamento bloqueado com aviso da regra. \\
+CT-04 & RF-04 & Validar regra temporal de cancelamento & Tentativa de cancelar consulta com menos de 24 horas de antecedência & Cancelamento bloqueado pela regra de negócio com aviso explicativo. \\
 \hline
-CT-05 & RF-05 & Validar visualização da agenda & Médico acessa agenda do dia & Exibição correta das consultas marcadas. \\
+CT-05 & RF-05 & Validar visualização da agenda médica & Médico autenticado acessa o painel de agenda do dia atual & Exibição correta da lista cronológica de pacientes agendados no dia. \\
 \hline
-CT-06 & RF-06 & Validar registro de prontuário & Preenchimento de anamnese e diagnóstico & Prontuário salvo e consulta concluída. \\
+CT-06 & RF-06 & Validar registro de prontuário eletrônico & Preenchimento dos campos obrigatórios de anamnese e CID-10 & Prontuário clínico assinado, persistido e consulta com status CONCLUIDA. \\
 \hline
-CT-07 & RF-08 & Validar envio de lembrete & Simulação de 24h antes da consulta & E-mail de lembrete enviado ao paciente. \\
+CT-07 & RF-08 & Validar envio de lembrete automático & Simulação temporal atingindo o marco de 24 horas antes do agendamento & E-mail automático de lembrete disparado com sucesso para o paciente. \\
 \hline
-CT-08 & RF-11 & Validar histórico do paciente & Acesso à aba Meu Histórico & Listagem cronológica das consultas realizadas. \\
+CT-08 & RF-11 & Validar listagem de histórico clínico & Paciente acessa a aba Meu Histórico no seu dashboard & Listagem cronológica correta e completa das consultas finalizadas. \\
 \hline
-\end{tabular}\\
+\end{tabularx}\\
 \autoria
 \end{table}
 
 \subsection{Parte 3: Matriz de Rastreabilidade de Requisitos para Casos de Teste}
 
-A Tabela \ref{tab:matriz_testes} relaciona cada requisito funcional ao seu respectivo caso de teste.
+A Tabela \ref{tab:matriz_testes} formaliza a matriz bidirecional de rastreabilidade entre cada requisito funcional e seu respectivo caso de teste de verificação, assegurando cobertura transacional completa \cite{beizer1995}.
 
 \begin{table}[H]
 \centering
+\small
 \caption{Matriz de Rastreabilidade Requisitos $\times$ Casos de Teste.}
 \label{tab:matriz_testes}
-\begin{tabular}{|c|l|c|}
+\begin{tabularx}{\textwidth}{|c|>{\RaggedRight\arraybackslash}X|c|}
 \hline
-\textbf{Requisito Funcional (RF)} & \textbf{Descrição Resumida} & \textbf{Caso de Teste} \\
+\textbf{Requisito Funcional (RF)} & \textbf{Descrição Resumida do Requisito} & \textbf{Caso de Teste (CT)} \\
 \hline
-RF-01 & Cadastro de Paciente & CT-01 \\
+RF-01 & Cadastro completo de novo Paciente & CT-01 \\
 \hline
-RF-02 & Autenticação de Usuários & CT-02 \\
+RF-02 & Autenticação de Usuários e Controle de Acesso & CT-02 \\
 \hline
-RF-03 & Agendamento de Consulta & CT-03 \\
+RF-03 & Agendamento online de Consulta Médica & CT-03 \\
 \hline
-RF-04 & Cancelamento de Consulta & CT-04 \\
+RF-04 & Cancelamento com regra de antecedência mínima de 24 horas & CT-04 \\
 \hline
-RF-05 & Visualização de Agenda Médica & CT-05 \\
+RF-05 & Visualização diária de Agenda Médica & CT-05 \\
 \hline
-RF-06 & Registro de Prontuário & CT-06 \\
+RF-06 & Registro de Prontuário Eletrônico e CID-10 & CT-06 \\
 \hline
-RF-08 & Notificação de Lembrete & CT-07 \\
+RF-08 & Notificação automática de Lembrete por E-mail & CT-07 \\
 \hline
-RF-11 & Visualização de Histórico & CT-08 \\
+RF-11 & Visualização do Histórico cronológico pelo Paciente & CT-08 \\
 \hline
-\end{tabular}\\
+\end{tabularx}\\
 \autoria
 \end{table}

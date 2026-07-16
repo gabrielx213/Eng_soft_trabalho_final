@@ -8,18 +8,28 @@
 \usepackage[T1]{fontenc}
 \usepackage[brazil]{babel}
 
-% === FONTES E TIPOGRAFIA ===
+% === FONTES, TIPOGRAFIA E AJUSTES DE QUEBRA ===
 \usepackage{setspace}
 \usepackage{indentfirst}
+\usepackage{microtype}
+\usepackage{ragged2e}
+\usepackage{seqsplit}
+\usepackage{url}
 \setlength{\parindent}{1cm}
+\emergencystretch=3em
+\tolerance=9999
+\hbadness=9999
 
 % === IMAGENS E FIGURAS ===
 \usepackage{graphicx}
 \usepackage{float}
 
-% === TABELAS ===
+% === TABELAS AVANÇADAS ===
 \usepackage{array}
+\usepackage{tabularx}
 \usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
 
 % === MATEMÁTICA ===
 \usepackage{amsmath}
@@ -37,6 +47,7 @@
 
 % =============================================
 \begin{document}
+\sloppy
 
 % --- Pré-textuais ---
 \include{0.pretext}
@@ -74,7 +85,7 @@
 % --- Seção 11: Referências ---
 \newpage
 \addcontentsline{toc}{section}{REFERÊNCIAS}
-\nocite{sommerville2011,pressman2016,myers2011,nielsen1993,gamma1995,martin2019}
+\nocite{sommerville2011,pressman2016,booch2005,larman2004,fowler2002,martin2019,gamma1995,myers2011,beizer1995,nielsen1993,norman2013,shneiderman2016,burns2018,bassi2015,meyer1997,silberschatz2020,docker2023,react2023,prisma2023}
 \bibliographystyle{abntex2-alf}
 \bibliography{referencias}
 

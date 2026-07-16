@@ -2,27 +2,28 @@
 
 \subsection{Síntese das Decisões de Projeto}
 
-O presente Trabalho Final consolidou a concepção de um sistema web de gestão clínica integral, o \textbf{MedAgenda}, abordando todas as fases que constituem o projeto arquitetural e de software. Entre as principais decisões de projeto consolidadas neste documento, destacam-se:
+O presente Trabalho Final consolidou a concepção, especificação arquitetural e modelagem integral de um sistema web de gestão clínica, o \textbf{MedAgenda}, abordando todas as fases que compõem a disciplina de Engenharia de Software I \cite{sommerville2011}. O desenvolvimento do projeto permitiu comprovar na prática a aplicação dos seguintes preceitos metodológicos:
 \begin{itemize}
-    \item \textbf{Modelagem Comportamental e Estática}: A especificação de 12 Requisitos Funcionais e 6 Não Funcionais serviu como alicerce para uma modelagem UML completa e rastreável, integrando Casos de Uso, Diagramas de Classes, Sequência, Estados e Componentes.
-    \item \textbf{Arquitetura e Coesão}: A escolha da arquitetura em camadas com padrão MVC separou claramente a apresentação em React do núcleo transacional em Node.js e PostgreSQL. A análise técnica comprovou a obtenção de alta coesão funcional em serviços essenciais como \texttt{ConsultaService} e o desacoplamento de serviços auxiliares via Injeção de Dependência.
-    \item \textbf{Qualidade e Usabilidade}: O plano de verificação e teste estruturou 8 casos de teste diretamente amarrados aos requisitos fundamentais, enquanto o projeto de interface priorizou os princípios humanistas e as heurísticas de usabilidade de Jakob Nielsen, com foco na prevenção de erros operacionais em ambiente médico.
+    \item \textbf{Arquitetura Limpa e Desacoplada}: A escolha da arquitetura em camadas combinada com o padrão MVC permitiu segregar com clareza a camada de apresentação em Single Page Application (\textbf{React.js e Vite}) do núcleo transacional transacionado via API RESTful (\textbf{Node.js, Express, Prisma ORM e PostgreSQL}) \cite{martin2019, fowler2002}. Essa decisão eliminou dependências cíclicas e blindou as regras clínicas de negócio contra mudanças na tecnologia visual.
+    \item \textbf{Containerização e Reprodutibilidade Total}: A adoção estratégica do \textbf{Docker e Docker Compose} como plataforma de empacotamento e orquestração dos serviços (banco de dados relacional com volume persistente, servidor da API REST com bootstrap automático e servidor Nginx de alta performance para o frontend) resolveu definitivamente o desafio da portabilidade de ambientes e da reprodutibilidade de testes na Engenharia de Software \cite{docker2023, burns2018}. A capacidade de inicializar o ecossistema complexo via comando único (\texttt{docker compose up --build}) atesta o rigor operacional do projeto.
+    \item \textbf{Rastreabilidade Integral}: A especificação estruturada de doze requisitos funcionais e seis não funcionais manteve rastreabilidade bidirecional exata e auditável com o Diagrama de Casos de Uso, os doze casos de teste prioritários e a matriz transacional de verificação e validação \cite{myers2011}.
+    \item \textbf{Ergonomia e Usabilidade Clínica}: A projeção dos requisitos estruturais das cinco interfaces interativas demonstrou o compromisso com a redução de carga cognitiva e a prevenção de falhas operacionais em ambiente médico, aplicando diretamente as heurísticas clássicas de Jakob Nielsen \cite{nielsen1993, norman2013}.
 \end{itemize}
 
-\subsection{Limitações Identificadas}
+\subsection{Dificuldades Encontradas e Soluções Adotadas}
 
-Durante o desenvolvimento do documento de projeto, identificaram-se algumas limitações intrínsecas ao escopo acadêmico do trabalho:
+Durante o desenvolvimento deste trabalho, a equipe superou desafios técnicos e analíticos relevantes:
 \begin{itemize}
-    \item \textbf{Ausência de Prototipação de Alta Fidelidade Interativa}: Por tratar-se de um Documento de Projeto focado em especificações estruturais e wireframes de média fidelidade no relatório, não foi produzido um protótipo clicável dinâmico para testes formais com usuários reais.
-    \item \textbf{Integração com Sistemas Legados da Saúde}: O modelo assume o funcionamento autônomo da clínica, sem contemplar integração em tempo real com sistemas externos ou redes hospitalares públicas.
-    \item \textbf{Modelagem Simplificada de Faturamento}: O projeto priorizou os fluxos centrais de agendamento e prontuário, deixando aspectos aprofundados de faturamento de convênios médicos como extensões futuras.
+    \item \textbf{Modelagem de Regras Temporais no Domínio Médico}: A verificação de disponibilidade horária e a aplicação de restrições transacionadoras para cancelamento (regra das 24 horas de antecedência) exigiram cuidado na especificação dos atributos relacionais em \texttt{HorarioDisponivel} e \texttt{Consulta}, garantindo a acurácia dos cálculos temporais nos diagramas de sequência \cite{larman2004}.
+    \item \textbf{Orquestração de Containerização Heterogénea}: A comunicação em rede interna do Docker entre um frontend estático servido via Nginx e uma API REST em Node.js exigiu a configuração de regras de proxy reverso (\texttt{try\_files} e repasse da rota \texttt{/api}), além de condicionar a inicialização do backend à aprovação de integridade do banco de dados relacional (\texttt{depends\_on: condition: service\_healthy}) \cite{burns2018}.
+    \item \textbf{Manutenção do Foco Conceitual de Engenharia de Software}: Houve rigorosa atenção para não desviar o relatório do seu objetivo central — a especificação estrutural, modelagem arquitetural e levantamento formal de requisitos — evitando a inserção de imagens ou capturas de telas prontas, conforme orientação metodológica da disciplina \cite{sommerville2011}.
 \end{itemize}
 
 \subsection{Lições Aprendidas}
 
-A elaboração deste Documento de Projeto proporcionou ao grupo aprendizados significativos sobre a Engenharia de Software na prática:
+A realização do projeto MedAgenda proporcionou ensinamentos valiosos para a formação técnica e acadêmica dos integrantes da equipe:
 \begin{itemize}
-    \item \textbf{Importância da Rastreabilidade}: Constatou-se que manter o vínculo formal entre cada requisito funcional, diagrama UML correspondente e caso de teste é fundamental para evitar lacunas na especificação e garantir que nenhum requisito fique sem cobertura ou validação.
-    \item \textbf{O Valor do Desacoplamento Arquitetural}: Compreendeu-se que o uso consciente de princípios de projeto, em especial a Inversão de Dependência, simplifica a evolução do sistema e a criação de testes automatizados.
-    \item \textbf{Usabilidade como Requisito Crítico}: A experiência reforçou que em sistemas críticos como o de saúde, a usabilidade e a prevenção de erros na interface são tão vitais quanto o desempenho computacional da aplicação.
+    \item \textbf{O Valor do Desacoplamento Arquitetural}: Compreendeu-se que o uso consciente de princípios de design e padrões de projeto (tais como os padrões GoF, GRASP e Injeção de Dependência) simplifica drasticamente a evolução transacional do sistema, o reaproveitamento de código e a criação de suítes de testes automatizados \cite{gamma1995, larman2004}.
+    \item \textbf{O Poder da Containerização na Engenharia de Software}: Evidenciou-se que dominar ferramentas de virtualização leve como o Docker é indispensável para garantir que o software projetado em teoria opere de forma imutável, reprodutível e robusta em ambientes reais de homologação e produção \cite{docker2023}.
+    \item \textbf{Usabilidade como Requisito Crítico em Sistemas de Saúde}: A experiência consolidou a visão de que, em sistemas de missão crítica como os da área médica, a clareza da interface, o feedback visual dos estados e a prevenção proativa de erros humanos são tão vitais quanto a performance computacional e a integridade criptográfica da aplicação \cite{nielsen1993, silberschatz2020}.
 \end{itemize}

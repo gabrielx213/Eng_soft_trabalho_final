@@ -2,43 +2,43 @@
 
 \subsection{Aplicação de Princípios da Orientação a Objetos}
 
-O projeto do \textbf{MedAgenda} baseia-se solidamente no paradigma Orientado a Objetos (POO), concretizando os princípios fundamentais no Diagrama de Classes (Seção 3.2):
+O projeto do \textbf{MedAgenda} fundamenta-se solidamente no paradigma Orientado a Objetos (POO), concretizando os pilares da programação modular na estruturação das entidades apresentadas no Diagrama de Classes (Seção 3.2) \cite{meyer1997}:
 
 \subsubsection{1. Encapsulamento}
-O encapsulamento foi sistematicamente aplicado em todas as classes do modelo para proteger a integridade interna dos objetos contra manipulações diretas ou inválidas:
+O encapsulamento foi sistematicamente aplicado em todas as entidades e módulos do sistema para proteger a integridade interna dos objetos contra acessos indevidos ou mutações inválidas de estado \cite{larman2004}:
 \begin{itemize}
-    \item Todos os atributos de estado (como \texttt{cpf}, \texttt{senhaHash}, \texttt{anamnese}) foram definidos com visibilidade privada (\texttt{-}).
-    \item O acesso e mutação controlada desses dados ocorrem via métodos públicos de negócio (\texttt{+}) que aplicam validações rigorosas. Por exemplo, a classe \texttt{Consulta} não expõe um método arbitrário \texttt{setStatus()}; em vez disso, fornece métodos semânticos como \texttt{confirmar()}, \texttt{cancelar(motivo)} e \texttt{concluir()}, que asseguram a transição legal de estados descrita no Diagrama de Estado.
+    \item Todos os atributos de estado e dados sensíveis (tais como \texttt{cpf}, \texttt{senhaHash}, \texttt{anamnese} e \texttt{diagnostico}) foram estritamente declarados com visibilidade privada (\texttt{-}).
+    \item A leitura e mutação controlada de estado realizam-se apenas através de operações públicas semânticas de negócio (\texttt{+}) que aplicam validações de domínio. Por exemplo, a classe \texttt{Consulta} não expõe um método genérico \texttt{setStatus()}; em vez disso, provê métodos semânticos como \texttt{confirmar()}, \texttt{cancelar(motivo)} e \texttt{concluir()}, garantindo que as transições transacionem estritamente as regras modeladas no Diagrama de Estados \cite{meyer1997}.
 \end{itemize}
 
 \subsubsection{2. Herança}
-A hierarquia de generalização e especialização foi aplicada na modelagem de usuários:
+A hierarquia de generalização e especialização foi explorada para modelar de forma limpa os atores e usuários corporativos da clínica:
 \begin{itemize}
-    \item A classe abstrata \textbf{\texttt{Usuario}} encapsula os atributos e comportamentos comuns a qualquer ator autenticado (\texttt{id}, \texttt{nome}, \texttt{email}, \texttt{senhaHash}, além do método \texttt{login()}).
-    \item As subclasses \textbf{\texttt{Paciente}}, \textbf{\texttt{Medico}} e \textbf{\texttt{Administrador}} estendem a classe \texttt{Usuario}, herdando seus atributos e adicionando características específicas do seu papel (por exemplo, \texttt{crm} e \texttt{especialidade} para o Médico; \texttt{cpf} e \texttt{dataNascimento} para o Paciente).
+    \item A classe supertipo abstrata \textbf{\texttt{Usuario}} centraliza as propriedades e comportamentos comuns a qualquer pessoa autenticada na plataforma (\texttt{id}, \texttt{nome}, \texttt{email}, \texttt{senhaHash}, além das operações globais de sessão \texttt{login()} e \texttt{logout()}).
+    \item As subclasses concretas \textbf{\texttt{Paciente}}, \textbf{\texttt{Medico}} e \textbf{\texttt{Administrador}} herdam as propriedades fundamentais de \texttt{Usuario} e adicionam atributos específicos das suas obrigações clínicas e corporativas (como \texttt{crm} e \texttt{especialidade} para Médicos; \texttt{cpf} e \texttt{dataNascimento} para Pacientes; \texttt{nivelAcesso} para Administradores).
 \end{itemize}
 
 \subsubsection{3. Polimorfismo}
-O polimorfismo de inclusão e de sobrescrita foi explorado na lógica de permissões e relatórios:
+O polimorfismo de inclusão e sobrescrita de métodos foi aplicado no roteamento dinâmico e na verificação de permissões de acesso:
 \begin{itemize}
-    \item O método abstrato \texttt{obterPainelInicial()} em \texttt{Usuario} é sobrescrito de forma polimórfica em cada sub-classe, retornando a interface de navegação apropriada para cada perfil de usuário.
-    \item A validação de ações autorizadas processa instâncias de tipo genérico \texttt{Usuario}, mas executa dinamicamente em tempo de execução a verificação de regras de permissão implementadas nas subclasses concretas.
+    \item O método abstrato \texttt{obterPainelInicial()} definido em \texttt{Usuario} é polimorficamente implementado em cada subclasse específica, retornando ao navegador do cliente o painel ou dashboard de navegação personalizado e ergonômico correspondente a cada perfil de acesso \cite{larman2004}.
+    \item O mecanismo central de controle de permissão processa referências polimórficas do tipo genérico \texttt{Usuario}, resolvendo dinamicamente em tempo de execução as regras lógicas específicas de cada subclasse concreta.
 \end{itemize}
 
 \subsection{Justificativa de Decisões de Projeto e Relacionamentos}
 
 \begin{itemize}
-    \item \textbf{Por que a classe \texttt{HorarioDisponivel} foi separada da classe \texttt{Medico}?} \newline
-    Em vez de armazenar horários em um array simples dentro da entidade Médico, criou-se a entidade autônoma \texttt{HorarioDisponivel}. Isso permite consultas relacionais otimizadas (ex: listar todos os horários livres para Cardiologia na sexta-feira), evita concorrência transacional no registro de agendamento e mantém a classe \texttt{Medico} coesa.
-    \item \textbf{Por que foi escolhida a relação de Composição entre \texttt{Consulta} e \texttt{Prontuario}?} \newline
-    O prontuário é o registro legal indissociável de uma consulta médica realizada. Ele não tem razão de existir no sistema sem estar vinculado a uma consulta específica que lhe deu origem. A composição assegura que a integridade referencial do prontuário seja subordinada ao ciclo de vida da consulta concluída.
+    \item \textbf{Por que a classe \texttt{HorarioDisponivel} foi modelada de forma autônoma e separada de \texttt{Medico}?} \newline
+    Em vez de armazenar horários em um array de strings simples dentro da entidade Médico, criou-se a entidade relacional autônoma \texttt{HorarioDisponivel}. Essa decisão arquitetural viabiliza consultas SQL altamente otimizadas e filtradas (por exemplo: listar em milissegundos todos os horários livres para a especialidade Cardiologia na sexta-feira), evita concorrência e bloqueios transacionais durante agendamentos simultâneos e assegura que a entidade \texttt{Medico} permanezca com alta coesão estrutural \cite{larman2004, silberschatz2020}.
+    \item \textbf{Por que foi escolhida a relação de Composição forte entre \texttt{Consulta} e \texttt{Prontuario}?} \newline
+    O prontuário eletrônico constitui o registro clínico e legal indissociável de uma consulta médica finalizada. Ele não possui razão de existir no banco de dados sem estar subordinado a uma consulta específica que lhe originou. A composição forte assegura que a integridade referencial e o ciclo de vida transacional do prontuário permaneçam vinculados e dependentes da consulta \cite{booch2005}.
 \end{itemize}
 
 \subsection{Distribuição de Responsabilidades entre as Classes}
 
-A alocação de responsabilidades seguiu os padrões GRASP (\textit{General Responsibility Assignment Software Patterns}) e princípios SOLID:
+A distribuição de responsabilidades e métodos seguiu rigorosamente os padrões GRASP (\textit{General Responsibility Assignment Software Patterns}) e os princípios de design SOLID \cite{larman2004, martin2019}:
 \begin{itemize}
-    \item \textbf{Especialista na Informação (\textit{Information Expert})}: A classe \texttt{Consulta} é a responsável por validar se um cancelamento pode ocorrer, pois ela detém a informação de \texttt{dataHora} da consulta e conhece a regra das 24 horas de antecedência.
-    \item \textbf{Controlador (\textit{Controller})}: As classes de controlador (\texttt{ConsultaController}, \texttt{AutenticacaoController}) atuam como intermediárias entre a interface web e a lógica de negócios, orquestrando fluxos sem acumular regras de domínio.
-    \item \textbf{Princípio da Responsabilidade Única (SRP)}: O registro médico foi isolado na entidade \texttt{Prontuario}, evitando sobrecarregar a classe \texttt{Consulta} com campos clínicos extensos e mantendo o sigilo e coesão dos dados.
+    \item \textbf{Especialista na Informação (\textit{Information Expert})}: A classe \texttt{Consulta} foi designada como o especialista natural responsável por validar se o cancelamento pode ser acionado pelo paciente, pois é ela que detém a informação exata da propriedade \texttt{dataHora} da consulta e conhece a regra lógicocronológica das 24 horas de antecedência \cite{larman2004}.
+    \item \textbf{Controlador (\textit{Controller})}: As classes de controlador da camada de aplicação (como \texttt{ConsultaController} e \texttt{AutenticacaoController}) atuam como intermediárias transacionais entre as requisições HTTP da interface web e a lógica de negócios da clínica, orquestrando fluxos sem acumular regras de domínio que pertencem às entidades \cite{fowler2002}.
+    \item \textbf{Princípio da Responsabilidade Única (\textit{Single Responsibility Principle - SRP})}: O registro de anamnese, prescrição terapêutica e diagnóstico com CID-10 foi isolado na entidade própria \texttt{Prontuario}, evitando sobrecarregar a classe \texttt{Consulta} com campos clínicos longos, preservando a coesão do modelo e facilitando o controle de sigilo médico \cite{martin2019}.
 \end{itemize}

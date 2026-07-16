@@ -1,29 +1,30 @@
 \section{MODELAGEM UML}
 
-Esta seção apresenta a modelagem visual do sistema \textbf{MedAgenda} utilizando a Linguagem de Modelagem Unificada (UML). Os diagramas foram projetados para cobrir os aspectos funcionais, estruturais e comportamentais do sistema, mantendo estrita rastreabilidade com os requisitos especificados na Seção 2.
+Esta seção apresenta a modelagem visual do sistema \textbf{MedAgenda} utilizando a Linguagem de Modelagem Unificada (UML), em conformidade com as especificações canônicas de Booch, Rumbaugh e Jacobson \cite{booch2005}. Os diagramas foram projetados com rigor para cobrir os aspectos funcionais (casos de uso), estruturais (diagrama de classes e componentes) e comportamentais (diagramas de sequência e de estados do objeto) do sistema, mantendo estrita rastreabilidade com os requisitos e regras de negócio detalhadas na Seção 2 \cite{larman2004}.
 
 \subsection{Diagrama de Casos de Uso}
 
-O Diagrama de Casos de Uso apresenta as interações entre os atores externos e as funcionalidades oferecidas pelo sistema. Foram identificados três atores principais:
+O Diagrama de Casos de Uso delimita a fronteira do sistema com o mundo externo, mapeando as interações transacionais entre os atores corporativos e os serviços fundamentais providos pela plataforma \cite{booch2005}. Foram identificados e modelados três atores primários no domínio médico:
 \begin{itemize}
-    \item \textbf{Paciente}: Usuário final que busca agendar consultas, visualizar histórico e gerenciar seus dados.
-    \item \textbf{Médico}: Profissional de saúde responsável por atender consultas, gerenciar horários e registrar prontuários.
-    \item \textbf{Administrador}: Responsável pela gestão cadastral e geração de relatórios gerenciais da clínica.
+    \item \textbf{Paciente}: Ator que interage no agendamento, cancelamento, busca por profissionais de saúde e acompanhamento do seu histórico de atendimentos.
+    \item \textbf{Médico}: Ator que gerencia suas faixas horárias de trabalho, consulta a agenda diária e realiza o registro de prontuários clínicos e diagnósticos.
+    \item \textbf{Administrador}: Ator responsável pela administração geral da clínica, gerência de cadastros do corpo médico e emissão de relatórios consolidados de gestão.
 \end{itemize}
 
-A Tabela \ref{tab:cdu_desc} apresenta a especificação dos casos de uso modelados no sistema MedAgenda.
+A Tabela \ref{tab:cdu_desc} consolida a especificação estruturada dos casos de uso modelados no ecossistema MedAgenda.
 
 \begin{table}[H]
 \centering
+\small
 \caption{Especificação do Diagrama de Casos de Uso.}
 \label{tab:cdu_desc}
-\begin{tabular}{|c|l|c|l|}
+\begin{tabularx}{\textwidth}{|c|>{\RaggedRight\arraybackslash}X|l|>{\RaggedRight\arraybackslash}p{4cm}|}
 \hline
 \textbf{ID} & \textbf{Caso de Uso} & \textbf{Ator Principal} & \textbf{Relacionamentos} \\
 \hline
 CDU-01 & Cadastrar Paciente & Paciente & Nenhum \\
 \hline
-CDU-02 & Realizar Login & Todos & Nenhum \\
+CDU-02 & Realizar Login & Todos os Atores & Nenhum \\
 \hline
 CDU-03 & Agendar Consulta & Paciente & \textit{<<include>>} CDU-02 \\
 \hline
@@ -45,114 +46,116 @@ CDU-11 & Visualizar Histórico & Paciente & \textit{<<include>>} CDU-02 \\
 \hline
 CDU-12 & Gerenciar Horários & Médico & \textit{<<include>>} CDU-02 \\
 \hline
-\end{tabular}\\
+\end{tabularx}\\
 \autoria
 \end{table}
 
 \subsection{Diagrama de Classes}
 
-O Diagrama de Classes define a estrutura estática do MedAgenda, detalhando as classes essenciais do domínio, seus atributos principais, operações e relacionamentos:
+O Diagrama de Classes descreve a espinha dorsal estrutural e o modelo conceitual do MedAgenda, formalizando as entidades transacionais, seus atributos tipados, operações semânticas de mutação de estado e os relacionamentos e cardinalidades do domínio \cite{larman2004, meyer1997}:
 
 \begin{itemize}
     \item \textbf{Usuario (Classe Abstrata)}
     \begin{itemize}
         \item \textit{Atributos}: \texttt{- id: int}, \texttt{- nome: String}, \texttt{- email: String}, \texttt{- senhaHash: String}
-        \item \textit{Métodos}: \texttt{+ login(senha: String): bool}, \texttt{+ logout(): void}
+        \item \textit{Métodos}: \texttt{+ login(senha: String): bool}, \texttt{+ logout(): void}, \texttt{+ obterPainelInicial(): String}
     \end{itemize}
-    \item \textbf{Paciente (Herda de Usuario)}
+    \item \textbf{Paciente (Especialização de Usuario)}
     \begin{itemize}
-        \item \textit{Atributos}: \texttt{- cpf: String}, \texttt{- dataNascimento: Date}, \texttt{- telefone: String}
-        \item \textit{Métodos}: \texttt{+ agendarConsulta(...): Consulta}, \texttt{+ cancelarConsulta(id: int): bool}
+        \item \textit{Atributos}: \texttt{- cpf: String}, \texttt{- dataNascimento: Date}, \texttt{- telefone: String}, \texttt{- endereco: String}
+        \item \textit{Métodos}: \texttt{+ agendarConsulta(m: Medico, dt: DateTime): Consulta}, \newline \texttt{+ cancelarConsulta(idConsulta: int): bool}
     \end{itemize}
-    \item \textbf{Medico (Herda de Usuario)}
+    \item \textbf{Medico (Especialização de Usuario)}
     \begin{itemize}
         \item \textit{Atributos}: \texttt{- crm: String}, \texttt{- especialidade: String}, \texttt{- valorConsulta: float}
-        \item \textit{Métodos}: \texttt{+ gerenciarHorarios(): void}, \texttt{+ registrarProntuario(...): Prontuario}
+        \item \textit{Métodos}: \texttt{+ gerenciarHorarios(h: HorarioDisponivel): void}, \newline \texttt{+ registrarProntuario(c: Consulta, anamnese: String): Prontuario}
     \end{itemize}
-    \item \textbf{Administrador (Herda de Usuario)}
+    \item \textbf{Administrador (Especialização de Usuario)}
     \begin{itemize}
         \item \textit{Atributos}: \texttt{- nivelAcesso: int}
-        \item \textit{Métodos}: \texttt{+ cadastrarMedico(m: Medico): bool}, \texttt{+ gerarRelatorio(tipo: String): Relatorio}
+        \item \textit{Métodos}: \texttt{+ cadastrarMedico(m: Medico): bool}, \newline \texttt{+ gerarRelatorio(tipo: String, p: Periodo): Relatorio}
     \end{itemize}
-    \item \textbf{Consulta}
+    \item \textbf{Consulta (Entidade Central de Negócio)}
     \begin{itemize}
         \item \textit{Atributos}: \texttt{- id: int}, \texttt{- dataHora: DateTime}, \texttt{- status: String}, \texttt{- observacao: String}
         \item \textit{Métodos}: \texttt{+ confirmar(): void}, \texttt{+ cancelar(motivo: String): void}, \texttt{+ concluir(): void}
     \end{itemize}
-    \item \textbf{Prontuario}
+    \item \textbf{Prontuario (Composição de Consulta)}
     \begin{itemize}
         \item \textit{Atributos}: \texttt{- id: int}, \texttt{- anamnese: String}, \texttt{- diagnostico: String}, \texttt{- prescricao: String}
-        \item \textit{Métodos}: \texttt{+ assinarDigitalmente(): bool}, \texttt{+ obterResumo(): String}
+        \item \textit{Métodos}: \texttt{+ assinarDigitalmente(): bool}, \texttt{+ obterResumoClinico(): String}
     \end{itemize}
-    \item \textbf{HorarioDisponivel}
+    \item \textbf{HorarioDisponivel (Entidade de Agendamento)}
     \begin{itemize}
-        \item \textit{Atributos}: \texttt{- id: int}, \texttt{- diaSemana: int}, \texttt{- horaInicio: Time}, \texttt{- ativo: bool}
-        \item \textit{Métodos}: \texttt{+ bloquear(): void}, \texttt{+ liberar(): void}
+        \item \textit{Atributos}: \texttt{- id: int}, \texttt{- diaSemana: int}, \texttt{- horaInicio: String}, \texttt{- ativo: bool}
+        \item \textit{Métodos}: \texttt{+ bloquearHorario(): void}, \texttt{+ liberarHorario(): void}
     \end{itemize}
 \end{itemize}
 
-\textbf{Principais Relacionamentos e Multiplicidades:}
+\textbf{Relacionamentos Estruturais e Multiplicidades:}
 \begin{itemize}
-    \item \textbf{Paciente (1) para (0..* ) Consulta}: Um paciente pode possuir várias consultas associadas.
-    \item \textbf{Medico (1) para (0..* ) Consulta}: Um médico atende diversas consultas ao longo de sua agenda.
-    \item \textbf{Consulta (1) para (0..1) Prontuario}: Cada consulta concluída compõe exatamente um prontuário clínico (composição).
-    \item \textbf{Medico (1) para (1..* ) HorarioDisponivel}: Um médico gerencia um conjunto de horários para agendamento.
+    \item \textbf{Paciente (1) para (0..* ) Consulta}: Associação onde o paciente atua como titular de múltiplos agendamentos no seu ciclo de vida na clínica.
+    \item \textbf{Medico (1) para (0..* ) Consulta}: Associação que vincula o profissional responsável por atender cada consulta médica agendada.
+    \item \textbf{Consulta (1) para (0..1) Prontuario}: Relação de \textbf{Composição forte}, onde o registro de prontuário eletrônico é subordinado diretamente à existência de uma consulta médica previamente concluída \cite{larman2004}.
+    \item \textbf{Medico (1) para (1..* ) HorarioDisponivel}: Associação que separa a grade horária em uma entidade autônoma para permitir pesquisas eficientes no banco de dados.
 \end{itemize}
 
 \subsection{Diagramas de Sequência}
 
-Os Diagramas de Sequência ilustram a troca de mensagens entre os objetos do sistema para realizar os fluxos mais relevantes:
+Os Diagramas de Sequência demonstram a ordem cronológica e a troca de mensagens transacionais entre os controladores, serviços e repositórios para concretizar os fluxos críticos de negócio \cite{booch2005}:
 
 \subsubsection{DS-01: Agendamento de Consulta (Atende ao RF-03)}
 \begin{enumerate}
-    \item O \textbf{Paciente} seleciona especialidade, médico, data e horário na interface.
-    \item O \texttt{ConsultaController} verifica a disponibilidade no \texttt{HorarioService}.
-    \item Sendo válido, o \texttt{ConsultaController} instancia uma nova \texttt{Consulta} com status \texttt{AGENDADA}.
-    \item O \texttt{ConsultaRepository} persiste o agendamento no banco de dados.
-    \item O sistema aciona o \texttt{NotificacaoService} para confirmar o agendamento ao paciente.
+    \item O \textbf{Paciente} seleciona a especialidade, médico, data e horário diretamente na interface web.
+    \item A camada de apresentação envia a requisição para o \texttt{ConsultaController}.
+    \item O controlador consulta o \texttt{HorarioService} para confirmar se a faixa horária solicitada ainda está ativa e não foi reservada por outra transação concorrente.
+    \item Com a validação positiva, o \texttt{ConsultaController} instancia uma nova \texttt{Consulta} com status inicial \texttt{AGENDADA}.
+    \item O \texttt{ConsultaRepository} executa a inserção transacional do registro no banco de dados relacional.
+    \item O \texttt{NotificacaoService} é notificado em background para encaminhar o e-mail de confirmação ao paciente.
 \end{enumerate}
 
 \subsubsection{DS-02: Cancelamento de Consulta (Atende ao RF-04)}
 \begin{enumerate}
-    \item O \textbf{Paciente} solicita o cancelamento da consulta informando o motivo.
-    \item O \texttt{ConsultaController} verifica se o cancelamento respeita a antecedência mínima de 24 horas.
-    \item Em caso positivo, o status da consulta é alterado para \texttt{CANCELADA}.
-    \item O horário correspondente é liberado para novos agendamentos em \texttt{HorarioDisponivel}.
-    \item O \texttt{NotificacaoService} envia o aviso de cancelamento para paciente e médico.
+    \item O \textbf{Paciente} solicita o cancelamento na sua lista de agendamentos, informando o motivo.
+    \item O \texttt{ConsultaController} delega ao \texttt{ConsultaService} a verificação temporal do agendamento em comparação com o relógio do servidor.
+    \item Caso a diferença entre o horário atual e a data da consulta seja superior a 24 horas, a regra de negócio do RF-04 autoriza a transição do status para \texttt{CANCELADA}.
+    \item O \texttt{HorarioService} é acionado para reativar o registro de \texttt{HorarioDisponivel}, disponibilizando o slot para outros pacientes da clínica.
+    \item O \texttt{NotificacaoService} emite comunicados automáticos de cancelamento tanto para o paciente quanto para o médico responsável.
 \end{enumerate}
 
 \subsubsection{DS-03: Autenticação no Sistema (Atende ao RF-02)}
 \begin{enumerate}
-    \item O usuário submete e-mail e senha na tela de login.
-    \item O \texttt{AuthService} busca o usuário no banco de dados e valida o hash da senha.
-    \item Em caso de sucesso, gera e retorna uma sessão segura para o usuário com seu respectivo perfil de acesso.
+    \item O usuário submete suas credenciais (e-mail e senha) no formulário da tela inicial.
+    \item O \texttt{AuthService} processa a requisição consultando o \texttt{UsuarioRepository}.
+    \item O serviço executa a comparação segura do hash da senha digitada contra o registro criptografado persistido.
+    \item Confirmada a autenticidade, o servidor gera um token de sessão com as permissões de acesso e redireciona o usuário para seu respectivo painel interativo.
 \end{enumerate}
 
 \subsection{Diagramas de Gráficos de Estado}
 
-A modelagem comportamental de estados descreve o ciclo de vida dos objetos fundamentais do negócio:
+A modelagem dinâmica de estados mapeia todas as transições legais que as entidades centrais podem assumir ao longo do processamento transacional do sistema \cite{booch2005}:
 
 \subsubsection{1. Ciclo de Vida do Objeto \texttt{Consulta}}
 \begin{itemize}
-    \item \textbf{AGENDADA}: Estado inicial criado ao finalizar a solicitação do paciente.
-    \item \textbf{CONFIRMADA}: Transição disparada quando a consulta está confirmada para atendimento.
-    \item \textbf{CANCELADA}: Transição possível a partir de \texttt{AGENDADA} ou \texttt{CONFIRMADA}, desde que respeitada a regra de 24 horas.
-    \item \textbf{EM\_ANDAMENTO}: Consulta iniciada no consultório médico no horário marcado.
-    \item \textbf{CONCLUIDA}: Estado final alcançado após o preenchimento obrigatório e assinatura do prontuário médico.
+    \item \textbf{AGENDADA}: Estado inicial, atribuído no momento em que o paciente conclui a solicitação de agendamento no sistema.
+    \item \textbf{CONFIRMADA}: Estado atingido após a verificação automática pela secretaria ou confirmação prévia via notificação.
+    \item \textbf{CANCELADA}: Estado final alternativo, acionado quando o paciente ou a clínica desmarcam a consulta respeitando a antecedência mínima de 24 horas.
+    \item \textbf{EM\_ANDAMENTO}: Transição acionada no momento em que o paciente entra no consultório e o médico inicia o atendimento na tela diária.
+    \item \textbf{CONCLUIDA}: Estado final definitivo, estabelecido obrigatoriamente logo após o preenchimento integral dos dados clínicos e assinatura digital do prontuário pelo profissional.
 \end{itemize}
 
 \subsubsection{2. Ciclo de Vida do Objeto \texttt{Paciente}}
 \begin{itemize}
-    \item \textbf{INATIVO}: Cadastro criado aguardando verificação por e-mail.
-    \item \textbf{ATIVO}: Conta confirmada e apta para realizar agendamentos.
-    \item \textbf{BLOQUEADO}: Estado acionado em caso de ausências reiteradas sem justificativa prévia.
+    \item \textbf{INATIVO}: Estado provisório do cadastro durante o período de verificação do endereço de e-mail no ato da criação da conta.
+    \item \textbf{ATIVO}: Estado operacional padrão, no qual o paciente possui permissão plena para agendar e cancelar consultas no sistema.
+    \item \textbf{BLOQUEADO}: Estado de exceção acionado automaticamente ou por administradores em casos de excesso de ausências injustificadas (no-show), impedindo novos agendamentos online sem prévio contato com a clínica.
 \end{itemize}
 
 \subsection{Diagrama de Componentes e Implantação}
 
-A arquitetura de implantação do sistema organiza-se em três camadas principais interconectadas via protocolos padrão:
+A arquitetura lógica de componentes ilustra a decomposição modular do sistema e suas conexões por meio de interfaces bem definidas e desacopladas \cite{fowler2002}:
 \begin{itemize}
-    \item \textbf{Apresentação (Cliente Web)}: Aplicação Frontend executada no navegador do usuário, comunicando-se via HTTPS com a API REST.
-    \item \textbf{Aplicação (Servidor Backend)}: Módulos de controle, serviços (\texttt{ConsultaService}, \texttt{ProntuarioService}, \texttt{AuthService}) e lógica de negócios executados no servidor.
-    \item \textbf{Persistência (Banco de Dados)}: Banco de dados relacional PostgreSQL armazenando cadastros, consultas, prontuários e históricos com integridade e segurança.
+    \item \textbf{Camada de Apresentação (Frontend React)}: Componentes visuais (\texttt{AgendamentoView}, \texttt{ProntuarioView}, \texttt{DashboardView}) que interagem com o usuário e se comunicam exclusivamente por chamadas HTTP RESTful com o backend.
+    \item \textbf{Camada de Aplicação (API REST Node.js/Express)}: Componentes transacionadores e de domínio (\texttt{ConsultaController}, \texttt{ConsultaService}, \texttt{NotificacaoService}, \texttt{AuthService}) responsáveis pela validação das regras de negócio, autenticação JWT e controle do fluxo de dados \cite{martin2019}.
+    \item \textbf{Camada de Persistência (Prisma ORM $\times$ PostgreSQL)}: Componentes de acesso a dados (\texttt{ConsultaRepository}, \texttt{UsuarioRepository}) que traduzem as chamadas orientadas a objetos da aplicação para consultas relacionais seguras, garantindo conformidade transacional ACID sobre as tabelas físicas do banco de dados \cite{silberschatz2020}.
 \end{itemize}

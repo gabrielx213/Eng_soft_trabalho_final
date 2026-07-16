@@ -1,86 +1,89 @@
 \section{REVISÃO DOS REQUISITOS}
 
-Esta seção apresenta os requisitos funcionais e não funcionais que servem de base para o projeto do sistema MedAgenda. Por se tratar de um sistema novo, os requisitos foram integralmente especificados para esta etapa.
+Esta seção apresenta a especificação formal e estruturada dos requisitos funcionais e não funcionais que servem de alicerce para o projeto arquitetural e modelagem orientada a objetos do sistema \textbf{MedAgenda}. Por tratar-se de um sistema novo no escopo da disciplina, os requisitos foram integralmente levantados, refinados e formalizados para esta etapa, seguindo as diretrizes clássicas de Engenharia de Requisitos \cite{sommerville2011, pressman2016}.
 
 \subsection{Requisitos Funcionais}
 
-A Tabela \ref{tab:rf} apresenta os requisitos funcionais identificados para o sistema MedAgenda.
+Os Requisitos Funcionais (RF) descrevem as operações essenciais, serviços e comportamentos que o sistema deve prover aos seus atores corporativos no domínio médico \cite{larman2004}. A Tabela \ref{tab:rf} consolida os doze requisitos funcionais especificados para o MedAgenda.
 
 \begin{table}[H]
 \centering
+\small
 \caption{Requisitos funcionais do sistema MedAgenda.}
 \label{tab:rf}
-\begin{tabular}{|c|p{12.5cm}|}
+\begin{tabularx}{\textwidth}{|c|>{\RaggedRight\arraybackslash}X|}
 \hline
-\textbf{ID} & \textbf{Descrição} \\
+\textbf{ID} & \textbf{Descrição do Requisito} \\
 \hline
-RF-01 & O sistema deve permitir o cadastro de novos pacientes, incluindo nome completo, CPF, data de nascimento, telefone, e-mail e endereço. \\
+RF-01 & O sistema deve permitir o cadastro de novos pacientes, registrando obrigatoriamente nome completo, CPF, data de nascimento, telefone de contato, e-mail e endereço residencial. \\
 \hline
-RF-02 & O sistema deve permitir a autenticação de usuários (pacientes, médicos e administradores) por meio de e-mail e senha. \\
+RF-02 & O sistema deve permitir a autenticação de usuários (pacientes, médicos e administradores) por meio de e-mail e senha com validação criptográfica. \\
 \hline
-RF-03 & O sistema deve permitir que pacientes agendem consultas selecionando a especialidade médica, o médico desejado, a data e o horário disponível. \\
+RF-03 & O sistema deve permitir que pacientes agendem consultas médicas selecionando a especialidade desejada, o profissional médico e um horário disponível no cronograma da clínica. \\
 \hline
-RF-04 & O sistema deve permitir que pacientes cancelem consultas agendadas com no mínimo 24 horas de antecedência. \\
+RF-04 & O sistema deve permitir que pacientes cancelem consultas previamente agendadas, bloqueando automaticamente o cancelamento com menos de 24 horas de antecedência da consulta. \\
 \hline
-RF-05 & O sistema deve permitir que médicos visualizem sua agenda de consultas, filtrada por data e período. \\
+RF-05 & O sistema deve permitir que os profissionais médicos visualizem sua agenda diária e periódica de atendimentos, filtrada por data, turno e status. \\
 \hline
-RF-06 & O sistema deve permitir que médicos registrem informações no prontuário eletrônico do paciente após a realização da consulta. \\
+RF-06 & O sistema deve permitir que médicos registrem o prontuário eletrônico do paciente logo após o atendimento, preenchendo campos obrigatórios de anamnese, diagnóstico (CID-10) e prescrição terapêutica. \\
 \hline
-RF-07 & O sistema deve permitir que pacientes pesquisem médicos por especialidade, nome ou disponibilidade de horário. \\
+RF-07 & O sistema deve permitir que pacientes pesquisem médicos por especialidade, nome completo ou faixas de disponibilidade de horário no sistema. \\
 \hline
-RF-08 & O sistema deve enviar notificações automáticas de lembrete de consulta por e-mail ao paciente, 24 horas antes da data agendada. \\
+RF-08 & O sistema deve disparar notificações automáticas de lembrete por e-mail ao paciente exatamente 24 horas antes do horário marcado para sua consulta. \\
 \hline
-RF-09 & O sistema deve permitir que administradores cadastrem novos médicos com suas respectivas especialidades e horários. \\
+RF-09 & O sistema deve permitir que administradores realizem o cadastro de novos profissionais médicos, vinculando suas respectivas especialidades clínicas e jornadas horárias iniciais. \\
 \hline
-RF-10 & O sistema deve permitir que administradores gerem relatórios gerenciais sobre consultas e ocupação da clínica. \\
+RF-10 & O sistema deve permitir que administradores gerem relatórios gerenciais sobre o volume de consultas realizadas, cancelamentos e percentuais de ocupação da clínica por período. \\
 \hline
-RF-11 & O sistema deve permitir que pacientes visualizem seu histórico de consultas realizadas. \\
+RF-11 & O sistema deve permitir que pacientes consultem o histórico cronológico de todas as suas consultas já realizadas e finalizadas na clínica. \\
 \hline
-RF-12 & O sistema deve permitir que médicos gerenciem seus horários disponíveis para agendamento. \\
+RF-12 & O sistema deve permitir que médicos gerenciem de forma autônoma suas jornadas horárias e dias da semana disponíveis para agendamento online. \\
 \hline
-\end{tabular}\\
+\end{tabularx}\\
 \autoria
 \end{table}
 
 \subsection{Requisitos Não Funcionais}
 
-A Tabela \ref{tab:rnf} apresenta os requisitos não funcionais identificados para o sistema.
+Os Requisitos Não Funcionais (RNF) definem as restrições arquiteturais, de segurança, de usabilidade e de qualidade computacional sob as quais o software deve operar \cite{sommerville2011}. A Tabela \ref{tab:rnf} apresenta os seis requisitos não funcionais especificados para o ecossistema.
 
 \begin{table}[H]
 \centering
+\small
 \caption{Requisitos não funcionais do sistema MedAgenda.}
 \label{tab:rnf}
-\begin{tabular}{|c|c|p{9.5cm}|}
+\begin{tabularx}{\textwidth}{|c|l|>{\RaggedRight\arraybackslash}X|}
 \hline
-\textbf{ID} & \textbf{Categoria} & \textbf{Descrição} \\
+\textbf{ID} & \textbf{Categoria} & \textbf{Descrição Técnica} \\
 \hline
-RNF-01 & Desempenho & O sistema deve apresentar tempo de resposta inferior a 2 segundos para as operações principais do usuário. \\
+RNF-01 & Desempenho & O sistema deve processar requisições e apresentar tempo de resposta na interface inferior a 2 segundos para as transações principais do usuário. \\
 \hline
-RNF-02 & Disponibilidade & O sistema deve garantir disponibilidade mínima de 99,5\% durante o horário comercial. \\
+RNF-02 & Disponibilidade & O servidor de aplicação e o banco de dados devem assegurar disponibilidade operacional mínima de 99,5\% durante os turnos de atendimento comercial da clínica. \\
 \hline
-RNF-03 & Segurança & Os dados sensíveis dos pacientes e senhas devem ser armazenados de forma criptografada (LGPD). \\
+RNF-03 & Segurança & Todos os dados pessoais e clínicos sensíveis de pacientes, bem como senhas de acesso, devem ser persistidos com forte criptografia e hash no banco de dados, em conformidade com as exigências da LGPD \cite{silberschatz2020}. \\
 \hline
-RNF-04 & Usabilidade & A interface deve ser simples, intuitiva e responsiva para computadores e dispositivos móveis \cite{nielsen1993}. \\
+RNF-04 & Usabilidade & A interface interativa deve adotar o design responsivo, minimalista e ergonômico, assegurando fácil navegação em computadores de mesa, tablets e dispositivos móveis conforme as heurísticas de Nielsen \cite{nielsen1993, norman2013}. \\
 \hline
-RNF-05 & Escalabilidade & O sistema deve suportar pelo menos 500 usuários simultâneos sem perda perceptível de desempenho. \\
+RNF-05 & Escalabilidade & A arquitetura conteinerizada e modular deve ser capaz de suportar pelo menos 500 conexões simultâneas sem degradação do tempo de resposta \cite{burns2018}. \\
 \hline
-RNF-06 & Compatibilidade & O sistema deve funcionar perfeitamente nos navegadores Chrome, Firefox, Edge e Safari. \\
+RNF-06 & Compatibilidade & O sistema deve ser compatível com os padrões web modernos e operar sem distorções visuais ou funcionais nos navegadores Chrome, Firefox, Edge e Safari \cite{bassi2015}. \\
 \hline
-\end{tabular}\\
+\end{tabularx}\\
 \autoria
 \end{table}
 
 \subsection{Tabela de Rastreabilidade: Requisitos para Artefatos de Projeto}
 
-A Tabela \ref{tab:rastreabilidade} apresenta a rastreabilidade entre os requisitos funcionais e os artefatos de projeto produzidos neste documento.
+A rastreabilidade é um requisito de ouro na Engenharia de Software para assegurar que cada funcionalidade solicitada possua cobertura completa na modelagem de casos de uso, dinâmica de sequência e validação via testes automatizados e manuais \cite{pressman2016, myers2011}. A Tabela \ref{tab:rastreabilidade} estabelece o mapeamento bidirecional dos requisitos funcionais para os respectivos artefatos construídos neste documento de projeto.
 
 \begin{table}[H]
 \centering
+\small
 \caption{Rastreabilidade de requisitos para artefatos de projeto.}
 \label{tab:rastreabilidade}
-\begin{tabular}{|c|c|c|c|}
+\begin{tabularx}{\textwidth}{|c|c|c|c|}
 \hline
-\textbf{RF} & \textbf{Caso de Uso} & \textbf{Diagrama de Sequência} & \textbf{Caso de Teste} \\
+\textbf{Requisito (RF)} & \textbf{Caso de Uso (CDU)} & \textbf{Diagrama de Sequência (DS)} & \textbf{Caso de Teste (CT)} \\
 \hline
 RF-01 & CDU-01 & N/A & CT-01 \\
 \hline
@@ -106,6 +109,6 @@ RF-11 & CDU-11 & N/A & CT-08 \\
 \hline
 RF-12 & CDU-12 & N/A & N/A \\
 \hline
-\end{tabular}\\
+\end{tabularx}\\
 \autoria
 \end{table}

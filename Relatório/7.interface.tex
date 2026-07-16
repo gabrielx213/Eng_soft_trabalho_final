@@ -1,178 +1,111 @@
 \section{PROJETO DE INTERFACE E USABILIDADE}
 
-\subsection{Protótipos de Média Fidelidade}
+\subsection{Especificação e Requisitos Estruturais das Telas}
 
-O projeto de interface do \textbf{MedAgenda} prioriza a clareza visual, a navegação objetiva e a eficiência nas tarefas diárias da clínica \cite{nielsen1993}. A seguir são apresentados os wireframes estruturais das 5 telas principais do sistema.
+Conforme os preceitos fundamentais da Engenharia de Software focados nas fases de especificação e projeto de produto, esta seção apresenta o levantamento conceitual detalhado e os requisitos estruturais e de navegação das cinco telas centrais do sistema \textbf{MedAgenda} \cite{shneiderman2016}. Em conformidade com a evolução de arquiteturas web interativas e com o requisito de alta usabilidade do sistema, a camada visual e o dashboard interativo foram empacotados e componentizados na pilha moderna \textbf{React.js + Vite}, garantindo altíssimo desempenho no cliente e renderização reativa sem recargas de página \cite{react2023}. O foco metodológico desta seção reside na especificação analítica e precisa dos elementos, campos transacionais e regras operacionais de interface necessários para atender aos requisitos, sem incorrer na apresentação de capturas e imagens de telas prontas \cite{nielsen1993, norman2013}.
 
-\subsubsection{Tela 1: Autenticação de Usuários (Login)}
-A Tela de Login oferece uma interface limpa com campos de e-mail e senha, além de links rápidos para recuperação de senha e cadastro de novos pacientes.
+\subsubsection{Tela 1: Autenticação de Usuários e Acesso ao Sistema}
+\begin{itemize}
+    \item \textbf{Objetivo do Requisito de Interface}: Viabilizar o acesso seguro, rápido e ergonômico para pacientes, médicos e administradores corporativos na plataforma, além de encaminhar novos usuários para o fluxo de cadastro (atendimento aos requisitos RF-01 e RF-02).
+    \item \textbf{Elementos e Campos Obrigatórios na Estrutura}:
+    \begin{itemize}
+        \item Campo de entrada transacional para e-mail com validação instantânea de formato.
+        \item Campo de entrada para senha com mascaramento visual de segurança e botão de visualização temporária.
+        \item Botão principal de submissão para acionar a verificação de credenciais no backend.
+        \item Link de direcionamento de contexto para o formulário completo de cadastro de novos pacientes.
+        \item Link para o fluxo de recuperação de senha institucional ou pessoal via notificação por e-mail.
+    \end{itemize}
+    \item \textbf{Regras e Comportamento de Interface}: Ao autenticar com sucesso via token JWT, a aplicação SPA redireciona o usuário instantaneamente para o dashboard correspondente à sua autorização de acesso (Paciente, Médico ou Administrador). Em caso de credenciais inválidas, a interface exibe um alerta de erro explícito na parte superior sem apagar o e-mail preenchido, poupando esforço de digitação do usuário \cite{nielsen1993}.
+\end{itemize}
 
-\begin{figure}[H]
-\centering
-\fbox{\begin{minipage}{11cm}
-\centering
-\vspace{0.3cm}
-\textbf{MEDAGENDA: SISTEMA DE AGENDAMENTO MÉDICO} \\
-\vspace{0.3cm}
-\textbf{Acesse sua Conta} \\
-\vspace{0.3cm}
-E-mail: \texttt{[ usuario@clinica.com.br ]} \\
-\vspace{0.2cm}
-Senha: \texttt{[ ********************** ]} \\
-\vspace{0.4cm}
-\texttt{[ ENTRAR NO SISTEMA ]} \\
-\vspace{0.3cm}
-\footnotesize \underline{Esqueci minha senha} \quad | \quad \underline{Cadastrar novo paciente} \\
-\vspace{0.3cm}
-\end{minipage}}
-\vspace{0.2cm}
-\caption{Protótipo de Média Fidelidade: Tela de Login.}
-\label{fig:tela_login}
-\autoria
-\end{figure}
-
-\subsubsection{Tela 2: Agendamento de Consulta (Visão do Paciente)}
-A Tela de Agendamento conduz o paciente em passos sequenciais simples: escolha de especialidade, escolha do médico, data e seleção do horário livre.
-
-\begin{figure}[H]
-\centering
-\fbox{\begin{minipage}{12cm}
-\vspace{0.3cm}
-\textbf{MEDAGENDA} \hfill \footnotesize Olá, Maria Silva | \underline{Meus Agendamentos} | \underline{Sair} \\
-\hrule
-\vspace{0.3cm}
-\textbf{NOVO AGENDAMENTO DE CONSULTA} \\
-\vspace{0.2cm}
-1. Especialidade: \texttt{[ Cardiologia v ]} \\
-2. Médico: \texttt{[ Dr. Carlos Eduardo (CRM 12345) v ]} \\
-3. Data: \texttt{[ 25/07/2026 ]} \\
-4. Horários Disponíveis: \\
-\quad \texttt{[ 08:00 ] [ 09:30 ] [ 11:00 ] [ 14:30 ] [ 16:00 ]} \\
-\vspace{0.4cm}
-\centering \texttt{[ CONFIRMAR AGENDAMENTO ]} \quad \texttt{[ CANCELAR ]} \\
-\vspace{0.3cm}
-\end{minipage}}
-\vspace{0.2cm}
-\caption{Protótipo de Média Fidelidade: Tela de Agendamento (Paciente).}
-\label{fig:tela_agendamento}
-\autoria
-\end{figure}
+\subsubsection{Tela 2: Agendamento de Consultas Médicas (Visão do Paciente)}
+\begin{itemize}
+    \item \textbf{Objetivo do Requisito de Interface}: Conduzir o paciente em um fluxo intuitivo, passo a passo e sem sobrecarga cognitiva para a marcação de consultas e acompanhamento de seu histórico clínico (atendimento aos requisitos RF-03, RF-04, RF-07 e RF-11).
+    \item \textbf{Elementos e Campos Obrigatórios na Estrutura}:
+    \begin{itemize}
+        \item Seletor reativo em cascata listando as especialidades médicas com profissionais ativos na clínica.
+        \item Seletor condicional que exibe apenas os médicos vinculados à especialidade previamente selecionada.
+        \item Componente de calendário reativo para seleção da data de atendimento, bloqueando datas passadas ou feriados sem expediente.
+        \item Grade dinâmica de faixas horárias livres, atualizada em tempo real com base no status da agenda do médico selecionado.
+        \item Tabela transacional de agendamentos do paciente com selos visuais coloridos indicando o status atual (Confirmada, Agendada, Concluída ou Cancelada).
+        \item Botão transacional de cancelamento de agendamento subordinado à verificação temporal de antecedência mínima de 24 horas.
+    \end{itemize}
+    \item \textbf{Regras e Comportamento de Interface}: A seleção de um horário já reservado deve ser visualmente bloqueada antes do clique para prevenir colisões \cite{norman2013}. Caso o agendamento esteja a menos de 24 horas do horário fixado, o botão de cancelamento é automaticamente desabilitado na interface, exibindo uma dica visual explicativa (\textit{Tooltip}) em conformidade estrita com o requisito RF-04.
+\end{itemize}
 
 \subsubsection{Tela 3: Agenda Diária do Médico (Visão do Médico)}
-A Tela de Agenda apresenta aos médicos a listagem cronológica dos atendimentos do dia, indicando o status de cada consulta e atalho para o prontuário.
-
-\begin{figure}[H]
-\centering
-\fbox{\begin{minipage}{12cm}
-\vspace{0.3cm}
-\textbf{MEDAGENDA} \hfill \footnotesize Dr. Carlos Eduardo | \underline{Horários} | \underline{Sair} \\
-\hrule
-\vspace{0.3cm}
-\textbf{MINHA AGENDA - HOJE (20/07/2026)} \hfill Filtro: \texttt{[ Hoje v ]} \\
-\vspace{0.2cm}
-\begin{center}
-\begin{tabular}{lllc}
-\textbf{Horário} & \textbf{Paciente} & \textbf{Status} & \textbf{Ação} \\
-\hline
-08:00 & João Pedro Santos & Concluída & \underline{Ver Prontuário} \\
-09:30 & Maria Silva & Confirmada & \texttt{[ INICIAR ATEND. ]} \\
-11:00 & Ana Beatriz Lima & Agendada & \underline{Ver Detalhes} \\
-\hline
-\end{tabular}
-\end{center}
-\vspace{0.2cm}
-\end{minipage}}
-\vspace{0.2cm}
-\caption{Protótipo de Média Fidelidade: Agenda Diária do Médico.}
-\label{fig:tela_agenda}
-\autoria
-\end{figure}
+\begin{itemize}
+    \item \textbf{Objetivo do Requisito de Interface}: Estruturar o fluxo de trabalho diário do profissional de saúde, organizando as chamadas cronológicas e permitindo a gestão autônoma de sua disponibilidade (atendimento aos requisitos RF-05 e RF-12).
+    \item \textbf{Elementos e Campos Obrigatórios na Estrutura}:
+    \begin{itemize}
+        \item Componente de filtro de data rápido para navegar entre agendas passadas, do dia corrente ou agendas futuras.
+        \item Filtros rápidos de segmentação por turno de atendimento clínico (Manhã ou Tarde).
+        \item Tabela cronológica de pacientes contendo horário fixado, nome completo do paciente, CPF, telefone e status em tempo real do atendimento.
+        \item Botão de ação primária (\textit{Atender/Prontuário}) para iniciar o atendimento e carregar o registro médico do paciente.
+        \item Painel interativo para configuração e bloqueio de horários diários de disponibilidade do profissional.
+    \end{itemize}
+    \item \textbf{Regras e Comportamento de Interface}: A ordenação padrão dos registros é rigidamente cronológica em ordem crescente. Consultas com status Concluída permanecem listadas com destaque visual diferenciado para consulta, bloqueando qualquer edição não autorizada após a assinatura digital do prontuário \cite{shneiderman2016}.
+\end{itemize}
 
 \subsubsection{Tela 4: Registro de Prontuário Eletrônico}
-A Tela de Prontuário permite o registro estruturado de anamnese, diagnóstico (CID-10) e prescrição médica, garantindo a conclusão correta do atendimento.
-
-\begin{figure}[H]
-\centering
-\fbox{\begin{minipage}{12cm}
-\vspace{0.3cm}
-\textbf{ATENDIMENTO EM CURSO} (Paciente: \textbf{Maria Silva}, 41 anos) \\
-\hrule
-\vspace{0.3cm}
-\textbf{1. Anamnese / Queixa Principal:} \\
-\texttt{[ Paciente relata palpitações ocasionais ao esforço... ]} \\
-\vspace{0.2cm}
-\textbf{2. Diagnóstico Clínico (CID-10):} \texttt{[ I49.9 - Arritmia cardíaca ]} \\
-\vspace{0.2cm}
-\textbf{3. Prescrição Médica:} \\
-\texttt{[ Solicitado Holter 24h e Teste Ergométrico. ]} \\
-\vspace{0.4cm}
-\centering \texttt{[ FINALIZAR E ASSINAR PRONTUÁRIO ]} \quad \texttt{[ SALVAR RASCUNHO ]} \\
-\vspace{0.3cm}
-\end{minipage}}
-\vspace{0.2cm}
-\caption{Protótipo de Média Fidelidade: Registro de Prontuário.}
-\label{fig:tela_prontuario}
-\autoria
-\end{figure}
-
-\subsubsection{Tela 5: Painel de Relatórios e Gestão (Visão da Administração)}
-O Painel Administrativo consolida indicadores gerenciais de consultas, taxa de cancelamentos e ocupação da clínica.
-
-\begin{figure}[H]
-\centering
-\fbox{\begin{minipage}{12cm}
-\vspace{0.3cm}
-\textbf{MEDAGENDA: ADMINISTRAÇÃO} \hfill \footnotesize Admin | \underline{Médicos} | \underline{Relatórios} | \underline{Sair} \\
-\hrule
-\vspace{0.3cm}
-\textbf{INDICADORES GERENCIAIS - JULHO / 2026} \\
-\vspace{0.3cm}
-\begin{center}
-\begin{tabular}{ccc}
-\fbox{\textbf{Consultas: 428}} & \quad \fbox{\textbf{Cancelamentos: 6,2\%}} & \quad \fbox{\textbf{Ocupação: 88,4\%}}
-\end{tabular}
-\end{center}
-\vspace{0.4cm}
-\centering \textbf{Exportar:} \quad \texttt{[ RELATÓRIO PDF ]} \quad \texttt{[ PLANILHA EXCEL ]} \\
-\vspace{0.3cm}
-\end{minipage}}
-\vspace{0.2cm}
-\caption{Protótipo de Média Fidelidade: Painel Gerencial (Administrador).}
-\label{fig:tela_admin}
-\autoria
-\end{figure}
-
-\subsection{Fluxo de Navegação entre as Telas}
-
-A navegação no sistema segue fluxos intuitivos organizados por perfil de acesso:
 \begin{itemize}
-    \item \textbf{Fluxo do Paciente}: Login para Dashboard do Paciente para Agendar Consulta para Confirmação para Meus Agendamentos.
-    \item \textbf{Fluxo do Médico}: Login para Agenda Diária para Selecionar Paciente para Prontuário Eletrônico para Finalizar Consulta.
-    \item \textbf{Fluxo do Administrador}: Login para Painel Gerencial para Exportar Relatórios ou Cadastrar Profissionais.
+    \item \textbf{Objetivo do Requisito de Interface}: Prover uma interface ergonômica, limpa e padronizada para o registro clínico obrigatório ao término de cada atendimento médico (atendimento ao requisito RF-06).
+    \item \textbf{Elementos e Campos Obrigatórios na Estrutura}:
+    \begin{itemize}
+        \item Cabeçalho informativo fixo exibindo dados consolidados do paciente (Nome, CPF e Idade) e dados da consulta (Data, Horário e Especialidade).
+        \item Área de texto multi-linha com expansão automática para registro minucioso da anamnese, queixa principal e histórico relatado.
+        \item Campo transacional padronizado para digitação do diagnóstico clínico e seleção do código na Classificação Internacional de Doenças (CID-10).
+        \item Área de texto multi-linha para prescrição de medicamentos, solicitação de exames laboratoriais e orientações terapêuticas.
+        \item Botão primário com confirmação de ação para assinatura digital e fechamento definitivo do prontuário eletrônico.
+    \end{itemize}
+    \item \textbf{Regras e Comportamento de Interface}: O preenchimento dos campos de anamnese e de diagnóstico com CID-10 é condição obrigatória para habilitar o botão de finalização. Ao assinar o documento, a aplicação altera transacionalmente o status da consulta para Concluída e redireciona o médico para a sua agenda diária \cite{nielsen1993}.
+\end{itemize}
+
+\subsubsection{Tela 5: Painel Gerencial e Indicadores (Visão da Administração)}
+\begin{itemize}
+    \item \textbf{Objetivo do Requisito de Interface}: Centralizar indicadores estratégicos de desempenho e viabilizar o controle administrativo sobre o corpo médico da clínica (atendimento aos requisitos RF-09 e RF-10).
+    \item \textbf{Elementos e Campos Obrigatórios na Estrutura}:
+    \begin{itemize}
+        \item Cartões com métricas consolidadas em destaque (Total de Consultas no Período, Taxa Global de Cancelamento e Percentual de Ocupação da Clínica).
+        \item Gráficos e tabelas analíticas categorizando o volume de atendimentos por especialidade médica e por status da consulta.
+        \item Botões de exportação analítica permitindo baixar relatórios consolidados em formatos abertos (PDF e planilhas eletrônicas).
+        \item Formulário completo de gestão para o cadastro de novos profissionais de saúde (Nome Completo, CRM, Especialidade, E-mail e Horários iniciais).
+    \end{itemize}
+    \item \textbf{Regras e Comportamento de Interface}: A atualização dos indicadores ocorre dinamicamente conforme o período de filtro estipulado pela administração. O cadastro de novos médicos valida previamente a duplicidade de números de CRM na base de dados \cite{nielsen1993}.
+\end{itemize}
+
+\subsection{Fluxo de Navegação e Transição de Telas}
+
+A arquitetura e hierarquia de navegação foram concebidas com fluxos lineares, ergonômicos e livres de becos sem saída (\textit{Dead Ends}), divididos rigidamente conforme os papéis de acesso do usuário \cite{norman2013}:
+\begin{itemize}
+    \item \textbf{Fluxo Transacional do Paciente}: Autenticação na Plataforma ➔ Dashboard Principal de Agendamentos ➔ Seleção de Especialidade e Médico ➔ Escolha de Data e Horário Livre ➔ Confirmação e Registro do Agendamento ➔ Consulta ao Histórico Cronológico.
+    \item \textbf{Fluxo Transacional do Médico}: Autenticação na Plataforma ➔ Painel da Agenda Diária Cronológica ➔ Seleção de Consulta Confirmada ➔ Preenchimento de Anamnese e CID-10 no Prontuário ➔ Assinatura Digital e Conclusão do Atendimento.
+    \item \textbf{Fluxo Transacional da Administração}: Autenticação na Plataforma ➔ Dashboard Estratégico de Indicadores ➔ Gestão de Cadastros e Disponibilidade do Corpo Clínico ➔ Emissão e Exportação de Relatórios de Ocupação.
 \end{itemize}
 
 \subsection{Aplicação de Heurísticas de Usabilidade (Nielsen)}
 
-A Tabela \ref{tab:nielsen} apresenta a aplicação das Heurísticas de Nielsen na concepção das interfaces do MedAgenda \cite{nielsen1993}.
+O projeto estrutural das interfaces do MedAgenda incorpora estritamente as dez heurísticas clássicas de usabilidade de Jakob Nielsen \cite{nielsen1993, norman2013}, garantindo que a implementação final proporcione uma experiência clara, eficiente e segura para os profissionais de saúde e pacientes. A Tabela \ref{tab:nielsen} detalha essa correspondência técnica.
 
 \begin{table}[H]
 \centering
-\caption{Aplicação das Heurísticas de Nielsen nas interfaces projetadas.}
+\small
+\caption{Aplicação das Heurísticas de Nielsen na especificação estrutural da interface.}
 \label{tab:nielsen}
-\begin{tabular}{|p{3.5cm}|p{4.5cm}|p{5cm}|}
+\begin{tabularx}{\textwidth}{|>{\RaggedRight\arraybackslash}p{4cm}|>{\RaggedRight\arraybackslash}X|>{\RaggedRight\arraybackslash}p{5.2cm}|}
 \hline
-\textbf{Heurística} & \textbf{Evidência na Interface} & \textbf{Justificativa de Usabilidade} \\
+\textbf{Heurística de Nielsen} & \textbf{Requisito e Evidência na Especificação} & \textbf{Justificativa Técnica de Usabilidade} \\
 \hline
-1. Visibilidade do Status & Selos claros de status ("Confirmada", "Concluída") na agenda. & Mantém o usuário informado sobre o estado de cada consulta. \\
+1. Visibilidade do Status do Sistema & Exibição contínua de selos visuais diferenciados por cores para os status transacionais de consulta (Confirmada, Agendada, Concluída ou Cancelada). & Mantém o usuário plenamente ciente das mudanças de estado da sua solicitação em tempo real, reduzindo ansiedade e incertezas operacionais \cite{nielsen1993}. \\
 \hline
-2. Compatibilidade com o Mundo Real & Termos clínicos usuais ("Anamnese", "CID-10", "Especialidade"). & Respeita a convenção e o vocabulário natural da área médica. \\
+2. Compatibilidade entre Sistema e Mundo Real & Adoção estrita da terminologia clínica e médica padronizada no Brasil (Anamnese, CID-10, Prescrição Terapêutica, CRM e Especialidade Clínica). & Respeita o modelo mental e vocabulário cotidiano de médicos, secretárias e pacientes, eliminando jargões computacionais desnecessários \cite{norman2013}. \\
 \hline
-3. Prevenção de Erros & Exibição apenas dos horários livres e confirmação antes de assinar. & Previne agendamento duplo e envio incompleto de prontuário. \\
+3. Prevenção de Erros & Bloqueio prévio em tela de horários já reservados nos seletores e desabilitação automática da opção de cancelamento fora da regra de 24 horas. & Evita proativamente que o usuário cometa falhas contratuais ou gere colisões de horários no banco de dados \cite{shneiderman2016}. \\
 \hline
-4. Reconhecimento em vez de Memorização & Menus de seleção com nomes dos médicos e horários explícitos. & Evita que o usuário precise memorizar códigos ou CRMs. \\
+4. Reconhecimento em vez de Memorização & Menus reativos em cascata listando com clareza o nome completo dos médicos disponíveis, suas especialidades clínicas e faixas horárias explícitas. & Desonera a memória de curto prazo do paciente, eliminando a necessidade de memorizar códigos internos ou consultar tabelas externas de horários \cite{nielsen1993}. \\
 \hline
-5. Estética Minimalista & Telas limpas, focadas nas ações primárias de cada perfil. & Agiliza a leitura e reduz a sobrecarga visual nas tarefas rotineiras. \\
+5. Estética Minimalista e Eficiência & Telas limpas organizadas em cartões e tabelas cronológicas, apresentando em cada visão unicamente as informações e botões acionáveis do perfil logado. & Previne a sobrecarga cognitiva e fadiga visual durante o turno diário do profissional de saúde, agilizando o atendimento clínico \cite{norman2013}. \\
 \hline
-\end{tabular}\\
+\end{tabularx}\\
 \autoria
 \end{table}
