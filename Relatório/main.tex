@@ -6,7 +6,7 @@
 % === CODIFICAÇÃO E IDIOMA ===
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage[brazil]{babel}
+\usepackage[brazilian]{babel}
 
 % === FONTES, TIPOGRAFIA E AJUSTES DE QUEBRA ===
 \usepackage{setspace}
@@ -19,6 +19,7 @@
 \emergencystretch=3em
 \tolerance=9999
 \hbadness=9999
+\raggedbottom
 
 % === IMAGENS E FIGURAS ===
 \usepackage{graphicx}
@@ -30,6 +31,8 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{multirow}
+\setlength{\tabcolsep}{5pt}
+\renewcommand{\arraystretch}{1.15}
 
 % === MATEMÁTICA ===
 \usepackage{amsmath}
@@ -43,44 +46,44 @@
 \usepackage[alf,abnt-repeated-title-omit=yes,abnt-emphasize=bf,abnt-etal-list=0]{abntex2cite}
 
 % === COMANDOS PERSONALIZADOS ===
-\include{comand}
+\input{comand.tex}
 
 % =============================================
 \begin{document}
 \sloppy
 
 % --- Pré-textuais ---
-\include{0.pretext}
+\input{0.pretext.tex}
 
 % --- Seção 1: Introdução ---
-\include{1.introducao}
+\input{1.introducao.tex}
 
 % --- Seção 2: Revisão dos Requisitos ---
-\include{2.requisitos}
+\input{2.requisitos.tex}
 
 % --- Seção 3: Modelagem UML ---
-\include{3.modelagem}
+\input{3.modelagem.tex}
 
 % --- Seção 4: Projeto de Software e Arquitetura ---
-\include{4.arquitetura}
+\input{4.arquitetura.tex}
 
 % --- Seção 5: Projeto Orientado a Objetos ---
-\include{5.poo}
+\input{5.poo.tex}
 
 % --- Seção 6: Verificação, Validação e Teste ---
-\include{6.testes}
+\input{6.testes.tex}
 
 % --- Seção 7: Projeto de Interface e Usabilidade ---
-\include{7.interface}
+\input{7.interface.tex}
 
 % --- Seção 8: Conclusão ---
-\include{8.conclusao}
+\input{8.conclusao.tex}
 
 % --- Seção 9: Declaração de Uso de IA ---
-\include{9.ia}
+\input{9.ia.tex}
 
 % --- Seção 10: Divisão de Responsabilidades ---
-\include{10.responsabilidades}
+\input{10.responsabilidades.tex}
 
 % --- Seção 11: Referências ---
 \newpage

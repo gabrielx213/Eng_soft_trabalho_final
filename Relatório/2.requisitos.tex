@@ -6,7 +6,7 @@ Esta seção apresenta a especificação formal e estruturada dos requisitos fun
 
 Os Requisitos Funcionais (RF) descrevem as operações essenciais, serviços e comportamentos que o sistema deve prover aos seus atores corporativos no domínio médico \cite{larman2004}. A Tabela \ref{tab:rf} consolida os doze requisitos funcionais especificados para o MedAgenda.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \small
 \caption{Requisitos funcionais do sistema MedAgenda.}
@@ -47,7 +47,7 @@ RF-12 & O sistema deve permitir que médicos gerenciem de forma autônoma suas j
 
 Os Requisitos Não Funcionais (RNF) definem as restrições arquiteturais, de segurança, de usabilidade e de qualidade computacional sob as quais o software deve operar \cite{sommerville2011}. A Tabela \ref{tab:rnf} apresenta os seis requisitos não funcionais especificados para o ecossistema.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \small
 \caption{Requisitos não funcionais do sistema MedAgenda.}
@@ -76,12 +76,12 @@ RNF-06 & Compatibilidade & O sistema deve ser compatível com os padrões web mo
 
 A rastreabilidade é um requisito de ouro na Engenharia de Software para assegurar que cada funcionalidade solicitada possua cobertura completa na modelagem de casos de uso, dinâmica de sequência e validação via testes automatizados e manuais \cite{pressman2016, myers2011}. A Tabela \ref{tab:rastreabilidade} estabelece o mapeamento bidirecional dos requisitos funcionais para os respectivos artefatos construídos neste documento de projeto.
 
-\begin{table}[H]
+\begin{table}[htbp]
 \centering
 \small
 \caption{Rastreabilidade de requisitos para artefatos de projeto.}
 \label{tab:rastreabilidade}
-\begin{tabularx}{\textwidth}{|c|c|c|c|}
+\begin{tabularx}{\textwidth}{|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|>{\centering\arraybackslash}X|}
 \hline
 \textbf{Requisito (RF)} & \textbf{Caso de Uso (CDU)} & \textbf{Diagrama de Sequência (DS)} & \textbf{Caso de Teste (CT)} \\
 \hline

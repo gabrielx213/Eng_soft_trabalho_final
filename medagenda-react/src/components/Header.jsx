@@ -1,7 +1,7 @@
 // Componente Header (Cabeçalho com Seletor Rápido Demo, Alertas RF-08 e Modo Dark/Light)
-// MedAgenda - UFPA 2026.1
+// MedAgenda - UFPA 2026.1 - Design Corporativo Limpo
 import React, { useState } from 'react';
-import { Activity, Bell, Moon, Sun, Zap, LogOut, CheckCircle, User } from 'lucide-react';
+import { Activity, Bell, Moon, Sun, Shield, LogOut, User, Stethoscope, Settings } from 'lucide-react';
 
 export default function Header({ user, onSelectProfile, onLogout, theme, onToggleTheme, notificacoes }) {
   const [showNotifications, setShowNotifications] = useState(false);
@@ -11,35 +11,40 @@ export default function Header({ user, onSelectProfile, onLogout, theme, onToggl
     <header className="app-header">
       <div className="logo-area">
         <div className="logo-icon">
-          <Activity size={24} />
+          <Activity size={22} />
         </div>
         <div>
-          <h2 style={{ fontSize: '20px', lineHeight: '1.1' }}>MedAgenda</h2>
-          <p style={{ fontSize: '11px', color: 'var(--text-muted)' }}>SPA React • Node/Express • PostgreSQL/Prisma</p>
+          <h2 style={{ fontSize: '18px', lineHeight: '1.2', fontWeight: '700' }}>MedAgenda</h2>
+          <p style={{ fontSize: '11px', color: 'var(--muted-foreground)', fontWeight: '500' }}>Sistema de Agendamento e Prontuário</p>
         </div>
       </div>
 
-      {/* Seletor Rápido para Avaliação do Professor (RF-02 Demo) */}
+      {/* Seletor Rápido para Avaliação (RF-02) */}
       <div className="demo-switcher">
-        <Zap size={14} color="var(--warning)" />
-        <span>Modo Avaliação:</span>
+        <span style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginRight: '4px' }}>Modo Avaliação:</span>
         <button 
           className={`demo-btn ${user?.role === 'paciente' ? 'active' : ''}`}
           onClick={() => onSelectProfile('paciente')}
         >
-          🧑‍💼 Paciente (Maria)
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <User size={13} /> Paciente (Maria)
+          </span>
         </button>
         <button 
           className={`demo-btn ${user?.role === 'medico' ? 'active' : ''}`}
           onClick={() => onSelectProfile('medico')}
         >
-          👨‍⚕️ Médico (Dr. Carlos)
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <Stethoscope size={13} /> Médico (Dr. Carlos)
+          </span>
         </button>
         <button 
           className={`demo-btn ${user?.role === 'admin' ? 'active' : ''}`}
           onClick={() => onSelectProfile('admin')}
         >
-          ⚙️ Admin Geral
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <Settings size={13} /> Admin Geral
+          </span>
         </button>
       </div>
 
@@ -49,8 +54,9 @@ export default function Header({ user, onSelectProfile, onLogout, theme, onToggl
           <div style={{ position: 'relative' }}>
             <button 
               className="btn btn-secondary" 
-              style={{ padding: '8px 12px', position: 'relative' }}
+              style={{ padding: '8px 10px', position: 'relative' }}
               onClick={() => setShowNotifications(!showNotifications)}
+              title="Notificações (RF-08)"
             >
               <Bell size={18} />
               {nLidasCount > 0 && (
@@ -75,22 +81,23 @@ export default function Header({ user, onSelectProfile, onLogout, theme, onToggl
             </button>
 
             {showNotifications && (
-              <div className="glass-panel" style={{
+              <div className="clean-card" style={{
                 position: 'absolute',
                 right: 0,
-                top: '46px',
-                width: '340px',
-                maxHeight: '380px',
+                top: '44px',
+                width: '320px',
+                maxHeight: '360px',
                 overflowY: 'auto',
                 zIndex: 1500,
+                padding: '16px',
                 boxShadow: 'var(--shadow-lg)'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <h4 style={{ fontSize: '14px' }}>🔔 Alertas & Lembretes</h4>
-                  <span style={{ fontSize: '11px', color: 'var(--primary)' }}>RF-08 / RF-11</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>
+                  <h4 style={{ fontSize: '14px', fontWeight: '600' }}>Alertas & Lembretes</h4>
+                  <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: '600' }}>RF-08</span>
                 </div>
                 {notificacoes.filter(n => !user || n.usuarioId === user.id).length === 0 ? (
-                  <p style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', padding: '20px 0' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--muted-foreground)', textAlign: 'center', padding: '16px 0' }}>
                     Nenhuma notificação no momento.
                   </p>
                 ) : (
@@ -99,16 +106,16 @@ export default function Header({ user, onSelectProfile, onLogout, theme, onToggl
                       .filter(n => !user || n.usuarioId === user.id)
                       .map((n) => (
                         <div key={n.id} style={{
-                          padding: '10px',
-                          borderRadius: '12px',
-                          background: n.lida ? 'var(--bg-subtle)' : 'var(--success-bg)',
-                          borderLeft: '4px solid var(--primary)'
+                          padding: '10px 12px',
+                          borderRadius: '8px',
+                          backgroundColor: n.lida ? 'var(--secondary)' : 'var(--success-bg)',
+                          borderLeft: '3px solid var(--primary)'
                         }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                             <strong style={{ fontSize: '12px' }}>{n.titulo}</strong>
-                            <small style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{n.data}</small>
+                            <small style={{ fontSize: '11px', color: 'var(--muted-foreground)' }}>{n.data}</small>
                           </div>
-                          <p style={{ fontSize: '12px', marginTop: '4px' }}>{n.mensagem}</p>
+                          <p style={{ fontSize: '12px', marginTop: '4px', color: 'var(--foreground)' }}>{n.mensagem}</p>
                         </div>
                       ))}
                   </div>
@@ -121,17 +128,17 @@ export default function Header({ user, onSelectProfile, onLogout, theme, onToggl
         {/* Botão de Tema */}
         <button 
           className="btn btn-secondary" 
-          style={{ padding: '8px 12px' }}
+          style={{ padding: '8px 10px' }}
           onClick={onToggleTheme}
           title="Alternar Tema Claro/Escuro"
         >
-          {theme === 'dark' ? <Sun size={18} color="#FFD700" /> : <Moon size={18} />}
+          {theme === 'dark' ? <Sun size={18} color="#f59e0b" /> : <Moon size={18} />}
         </button>
 
         {/* Info do Usuário e Logout */}
         {user ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--bg-subtle)', padding: '6px 14px', borderRadius: '40px', border: '1px solid var(--card-border)' }}>
-            <User size={16} color="var(--primary)" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: 'var(--secondary)', padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+            <User size={15} color="var(--primary)" />
             <span style={{ fontSize: '13px', fontWeight: '600' }}>{user.nome.split(' ')[0]}</span>
             <button 
               onClick={onLogout} 
@@ -142,7 +149,7 @@ export default function Header({ user, onSelectProfile, onLogout, theme, onToggl
             </button>
           </div>
         ) : (
-          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Não autenticado</span>
+          <span style={{ fontSize: '12px', color: 'var(--muted-foreground)' }}>Não autenticado</span>
         )}
       </div>
     </header>
