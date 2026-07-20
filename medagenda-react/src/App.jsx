@@ -10,11 +10,15 @@ import DoctorView from './components/DoctorView';
 import AdminView from './components/AdminView';
 import { ApiService } from './services/api';
 import { StorageService } from './services/mockData';
+import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
 export default function App() {
   const [theme, setTheme] = useState(localStorage.getItem('medagenda_theme') || 'light');
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Sistema de Toasts Globais para confirmação em tempo real ("Redondinho e com confirmação visual")
+  const [toasts, setToasts] = useState([]);
 
   // Estados Globais de Dados (Sincronizados entre API REST e LocalStorage reativo)
   const [consultas, setConsultas] = useState([]);
@@ -33,6 +37,18 @@ export default function App() {
     StorageService.init();
     loadAllData();
   }, []);
+
+  function addToast(mensagem, tipo = 'success') {
+    const id = Date.now() + Math.random();
+    setToasts(prev => [...prev, { id, mensagem, tipo }]);
+    setTimeout(() => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, 5500);
+  }
+
+  function removeToast(id) {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }
 
   async function loadAllData() {
     try {
@@ -64,6 +80,10 @@ export default function App() {
       const usuario = await ApiService.login(email, senha);
       setUser(usuario);
       await loadAllData();
+      addToast(`Login bem-sucedido! Bem-vindo(a), ${usuario.nome.split(' ')[0]} (Perfil: ${usuario.role.toUpperCase()})`, 'success');
+    } catch (error) {
+      addToast(error.message || 'Falha no login.', 'danger');
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -76,6 +96,10 @@ export default function App() {
       const novo = await ApiService.cadastrarPaciente(dados);
       setUser(novo);
       await loadAllData();
+      addToast(`✓ Paciente cadastrado com sucesso (RF-01)! Bem-vindo(a), ${novo.nome.split(' ')[0]}!`, 'success');
+    } catch (error) {
+      addToast(error.message || 'Falha no cadastro.', 'danger');
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -83,6 +107,7 @@ export default function App() {
 
   function handleLogout() {
     setUser(null);
+    addToast('Sessão encerrada com sucesso.', 'info');
   }
 
   // Seletor Inteligente de Perfis (Modo Avaliação Demo para Professor)
@@ -92,39 +117,98 @@ export default function App() {
     if (targetUser) {
       setUser(targetUser);
       await loadAllData();
+      addToast(`✓ Perfil de avaliação alterado para: ${targetUser.nome} (${role.toUpperCase()})`, 'info');
     }
+  }
+
+  function handleMarcarNotificacoesLidas() {
+    const db = StorageService.get();
+    db.notificacoes.forEach(n => {
+      if (!user || n.usuarioId === user.id) n.lida = true;
+    });
+    StorageService.save(db);
+    loadAllData();
+    addToast('Todas as notificações foram marcadas como lidas (RF-08).', 'info');
   }
 
   // RF-03: Agendamento pelo Paciente
   async function handleAgendarConsulta(dados) {
-    const nova = await ApiService.agendarConsulta(dados);
-    await loadAllData();
-    return nova;
+    try {
+      const nova = await ApiService.agendarConsulta(dados);
+      await loadAllData();
+      addToast(`✓ Agendamento cadastrado com sucesso! Consulta de ${dados.especialidade} em ${dados.data} às ${dados.hora} com ${nova.medicoNome} (RF-03 & RF-08).`, 'success');
+      return nova;
+    } catch (error) {
+      addToast(error.message || 'Não foi possível agendar.', 'danger');
+      throw error;
+    }
   }
 
   // RF-04: Cancelamento com verificação 24h
   async function handleCancelarConsulta(id) {
-    const res = await ApiService.cancelarConsulta(id);
-    await loadAllData();
-    return res;
+    try {
+      const res = await ApiService.cancelarConsulta(id);
+      await loadAllData();
+      addToast('✓ Consulta cancelada com sucesso conforme regra de antecedência de 24 horas (RF-04).', 'warning');
+      return res;
+    } catch (error) {
+      addToast(error.message || 'Cancelamento bloqueado (RF-04).', 'danger');
+      throw error;
+    }
   }
 
   // RF-06: Registro de Prontuário Eletrônico
   async function handleRegistrarProntuario(dados) {
-    const res = await ApiService.registrarProntuario(dados);
-    await loadAllData();
-    return res;
+    try {
+      const res = await ApiService.registrarProntuario(dados);
+      await loadAllData();
+      addToast('✓ Laudo digital e prescrição médica registrados e vinculados à consulta com sucesso (RF-06 & RF-11)!', 'success');
+      return res;
+    } catch (error) {
+      addToast(error.message || 'Erro ao registrar prontuário.', 'danger');
+      throw error;
+    }
   }
 
   // RF-09: Cadastro de Médico pela Administração
   async function handleCadastrarMedico(dados) {
-    const res = await ApiService.cadastrarMedico(dados);
-    await loadAllData();
-    return res;
+    try {
+      const res = await ApiService.cadastrarMedico(dados);
+      await loadAllData();
+      addToast(`✓ Dr(a). ${dados.nome} cadastrado(a) com sucesso no corpo clínico (CRM: ${dados.crm} • ${dados.especialidade}) (RF-09)!`, 'success');
+      return res;
+    } catch (error) {
+      addToast(error.message || 'Erro ao cadastrar médico.', 'danger');
+      throw error;
+    }
   }
 
   return (
     <div className="app-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      
+      {/* Container de Toasts Flutuantes para Confirmações Instantâneas */}
+      <div className="toast-container">
+        {toasts.map(toast => (
+          <div key={toast.id} className={`toast-item toast-${toast.tipo} animate-slide-in`}>
+            <div>
+              {toast.tipo === 'success' && <CheckCircle2 size={18} color="var(--success)" />}
+              {toast.tipo === 'warning' && <AlertCircle size={18} color="var(--warning)" />}
+              {toast.tipo === 'danger' && <AlertCircle size={18} color="var(--danger)" />}
+              {toast.tipo === 'info' && <Info size={18} color="var(--primary)" />}
+            </div>
+            <div style={{ flex: 1, fontSize: '13px', lineHeight: '1.4', fontWeight: '500', color: 'var(--foreground)' }}>
+              {toast.mensagem}
+            </div>
+            <button 
+              onClick={() => removeToast(toast.id)}
+              style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--muted-foreground)' }}
+            >
+              <X size={15} />
+            </button>
+          </div>
+        ))}
+      </div>
+
       <Header 
         user={user} 
         onSelectProfile={handleSelectProfile} 
@@ -132,11 +216,17 @@ export default function App() {
         theme={theme} 
         onToggleTheme={handleToggleTheme}
         notificacoes={notificacoes}
+        onMarcarLidas={handleMarcarNotificacoesLidas}
       />
 
       <main style={{ flex: 1 }}>
         {!user ? (
-          <LoginView onLogin={handleLogin} onRegister={handleRegister} loading={loading} />
+          <LoginView 
+            onLogin={handleLogin} 
+            onRegister={handleRegister} 
+            loading={loading} 
+            onShowToast={addToast}
+          />
         ) : user.role === 'paciente' ? (
           <PatientView 
             user={user} 
@@ -144,13 +234,15 @@ export default function App() {
             medicos={medicos} 
             especialidades={especialidades} 
             onAgendar={handleAgendarConsulta} 
-            onCancelar={handleCancelarConsulta} 
+            onCancelar={handleCancelarConsulta}
+            onShowToast={addToast}
           />
         ) : user.role === 'medico' ? (
           <DoctorView 
             user={user} 
             consultas={consultas} 
-            onRegistrarProntuario={handleRegistrarProntuario} 
+            onRegistrarProntuario={handleRegistrarProntuario}
+            onShowToast={addToast}
           />
         ) : (
           <AdminView 
@@ -158,7 +250,8 @@ export default function App() {
             medicos={medicos} 
             especialidades={especialidades} 
             onCadastrarMedico={handleCadastrarMedico} 
-            theme={theme} 
+            theme={theme}
+            onShowToast={addToast}
           />
         )}
       </main>

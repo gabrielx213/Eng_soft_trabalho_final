@@ -1,9 +1,9 @@
-// Componente PatientView (Painel do Paciente - RF-03, RF-04, RF-07 e RF-11)
-// MedAgenda - UFPA 2026.1 - Design Corporativo Limpo (Estilo SIDAMA)
+// Componente PatientView (Painel Minimalista do Paciente - RF-03, RF-04, RF-07 e RF-11)
+// MedAgenda - UFPA 2026.1 - Design Simples e Elegante
 import React, { useState } from 'react';
-import { Calendar, Clock, Search, XCircle, FileText, PlusCircle, CheckCircle2, AlertCircle, User, X } from 'lucide-react';
+import { Calendar, Clock, Search, XCircle, FileText, PlusCircle, CheckCircle2, AlertCircle, User, Stethoscope } from 'lucide-react';
 
-export default function PatientView({ user, consultas, medicos, especialidades, onAgendar, onCancelar }) {
+export default function PatientView({ user, consultas, medicos, especialidades, onAgendar, onCancelar, onShowToast }) {
   const [activeTab, setActiveTab] = useState('agendamentos'); // 'agendamentos', 'busca', 'historico'
   const [showModal, setShowModal] = useState(false);
   const [selectedProntuario, setSelectedProntuario] = useState(null);
@@ -15,6 +15,9 @@ export default function PatientView({ user, consultas, medicos, especialidades, 
   const [selHora, setSelHora] = useState('');
   const [obs, setObs] = useState('');
   const [erroAg, setErroAg] = useState('');
+
+  // Confirmação inline
+  const [msgSucessoInline, setMsgSucessoInline] = useState('');
 
   // Busca de médicos (RF-07)
   const [termoBusca, setTermoBusca] = useState('');
@@ -36,12 +39,13 @@ export default function PatientView({ user, consultas, medicos, especialidades, 
   async function handleConfirmarAgendamento(e) {
     e.preventDefault();
     setErroAg('');
+    setMsgSucessoInline('');
     if (!selMedicoId || !selData || !selHora) {
       setErroAg('Selecione Médico, Data e Horário.');
       return;
     }
     try {
-      await onAgendar({
+      const novaConsulta = await onAgendar({
         pacienteId: user.id,
         medicoId: selMedicoId,
         especialidade: selEspec || medicoSelecionado?.especialidade || 'Clínica Geral',
@@ -52,266 +56,330 @@ export default function PatientView({ user, consultas, medicos, especialidades, 
       setShowModal(false);
       setSelHora('');
       setObs('');
+      setActiveTab('agendamentos');
+      setMsgSucessoInline(`✓ Consulta de ${novaConsulta.especialidade} agendada para ${novaConsulta.data} às ${novaConsulta.hora} com ${novaConsulta.medicoNome}! (RF-03 e RF-08 confirmados)`);
     } catch (err) {
       setErroAg(err.message || 'Erro ao agendar consulta.');
     }
   }
 
   async function handleTentativaCancelamento(consulta) {
+    setMsgSucessoInline('');
     if (window.confirm(`Confirma o cancelamento da consulta de ${consulta.especialidade} em ${consulta.data} às ${consulta.hora}?\n\nRegra do Requisito RF-04: O cancelamento só é autorizado com mais de 24 horas de antecedência do horário marcado.`)) {
       try {
         await onCancelar(consulta.id);
+        setMsgSucessoInline(`✓ Consulta com ${consulta.medicoNome} cancelada com sucesso. Regra de antecedência verificada (RF-04).`);
       } catch (err) {
+        onShowToast?.(err.message, 'danger');
         alert(`Não foi possível cancelar: ${err.message}`);
       }
     }
   }
 
+  // Lista para busca de médicos com filtro (RF-07)
+  const medicosParaExibir = medicos.filter(m => {
+    if (filtroEspecBusca && m.especialidade !== filtroEspecBusca) return false;
+    if (termoBusca && !m.nome.toLowerCase().includes(termoBusca.toLowerCase()) && !m.especialidade.toLowerCase().includes(termoBusca.toLowerCase())) return false;
+    return true;
+  });
+
   return (
-    <div style={{ maxWidth: '1100px', margin: '24px auto', padding: '0 16px' }}>
-      {/* Top Banner */}
-      <div className="clean-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+    <div className="animate-fade-in" style={{ maxWidth: '1040px', margin: '24px auto', padding: '0 24px' }}>
+      
+      {/* Cabeçalho Limpo */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <User size={20} color="var(--primary)" />
-            <h3 style={{ fontSize: '18px', fontWeight: '700' }}>Painel do Paciente — Olá, {user.nome.split(' ')[0]}!</h3>
-          </div>
-          <p style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>Gerencie seus agendamentos, pesquise especialistas e acesse laudos médicos digitais.</p>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--foreground)' }}>
+            Minhas Consultas e Prontuários
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--muted-foreground)', marginTop: '2px' }}>
+            Olá, {user.nome.split(' ')[0]}. Gerencie seus atendimentos de forma simples e segura.
+          </p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-          <PlusCircle size={18} />
-          Agendar Nova Consulta
+
+        <button 
+          className="btn btn-primary"
+          onClick={() => {
+            setSelEspec('');
+            setSelMedicoId('');
+            setShowModal(true);
+          }}
+        >
+          <PlusCircle size={16} />
+          Agendar Nova Consulta (RF-03)
         </button>
       </div>
 
-      {/* Navigation Tabs */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+      {/* Alerta de Confirmação Inline */}
+      {msgSucessoInline && (
+        <div className="animate-slide-in" style={{
+          padding: '14px 18px',
+          borderRadius: 'var(--radius)',
+          background: 'var(--success-bg)',
+          color: 'var(--success)',
+          border: '1px solid var(--success)',
+          marginBottom: '20px',
+          fontWeight: '500',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCircle2 size={18} />
+            <span>{msgSucessoInline}</span>
+          </div>
+          <button onClick={() => setMsgSucessoInline('')} style={{ background: 'transparent', border: 'none', color: 'var(--success)', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
+        </div>
+      )}
+
+      {/* Tabs Minimalistas */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', borderBottom: '1px solid var(--card-border)', paddingBottom: '12px', flexWrap: 'wrap' }}>
         <button 
           className={`btn ${activeTab === 'agendamentos' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setActiveTab('agendamentos')}
         >
-          <Calendar size={16} /> Meus Agendamentos ({agendamentosAtivos.length})
+          <Calendar size={15} /> Agendamentos Ativos ({agendamentosAtivos.length})
         </button>
         <button 
           className={`btn ${activeTab === 'busca' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setActiveTab('busca')}
         >
-          <Search size={16} /> Pesquisar Médicos (RF-07)
+          <Search size={15} /> Especialistas e Clínicas (RF-07)
         </button>
         <button 
           className={`btn ${activeTab === 'historico' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setActiveTab('historico')}
         >
-          <FileText size={16} /> Histórico & Prontuários ({historicoConcluido.length})
+          <FileText size={15} /> Histórico e Laudos ({historicoConcluido.length})
         </button>
       </div>
 
       {/* Tab 1: Agendamentos */}
       {activeTab === 'agendamentos' && (
         <div className="clean-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-            <h4 style={{ fontSize: '16px', fontWeight: '600' }}>Consultas Agendadas / Confirmadas</h4>
-            <span style={{ fontSize: '12px', color: 'var(--warning)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <AlertCircle size={14} /> RF-04: Cancelamento permitido apenas com 24h de antecedência
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600' }}>Consultas Confirmadas</span>
+            <span style={{ fontSize: '12px', color: 'var(--warning)', fontWeight: '500' }}>
+              ℹ️ Cancelamento autorizado somente com &gt; 24h de antecedência (RF-04)
             </span>
           </div>
 
           {agendamentosAtivos.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--muted-foreground)' }}>
-              <Calendar size={40} style={{ opacity: 0.4, margin: '0 auto 12px' }} />
-              <p style={{ fontSize: '14px', fontWeight: '500' }}>Você não possui consultas agendadas no momento.</p>
+              <p style={{ fontSize: '15px', fontWeight: '500' }}>Você não possui consultas agendadas no momento.</p>
+              <button 
+                className="btn btn-secondary" 
+                style={{ marginTop: '14px', fontSize: '13px' }}
+                onClick={() => setShowModal(true)}
+              >
+                + Marcar primeira consulta agora
+              </button>
             </div>
           ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Data & Hora</th>
-                    <th>Especialidade</th>
-                    <th>Médico(a)</th>
-                    <th>Observação</th>
-                    <th>Status</th>
-                    <th>Ação</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {agendamentosAtivos.map(c => (
-                    <tr key={c.id}>
-                      <td>
-                        <strong style={{ color: 'var(--foreground)' }}>{c.data}</strong><br />
-                        <span style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                          <Clock size={13} /> {c.hora}
-                        </span>
-                      </td>
-                      <td style={{ fontWeight: '500' }}>{c.especialidade}</td>
-                      <td>{c.medicoNome}</td>
-                      <td style={{ maxWidth: '220px', fontSize: '13px', color: 'var(--muted-foreground)' }}>{c.observacao || '—'}</td>
-                      <td>
-                        <span className={`badge badge-${c.status}`}>{c.status}</span>
-                      </td>
-                      <td>
-                        <button 
-                          className="btn btn-danger" 
-                          style={{ padding: '6px 12px', fontSize: '12px' }}
-                          onClick={() => handleTentativaCancelamento(c)}
-                        >
-                          <XCircle size={14} />
-                          Cancelar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {agendamentosAtivos.map(c => (
+                <div key={c.id} style={{
+                  border: '1px solid var(--card-border)',
+                  borderRadius: 'var(--radius)',
+                  padding: '16px 20px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '16px',
+                  background: 'var(--card-bg)'
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                      <span className={`badge badge-${c.status}`}>{c.status}</span>
+                      <strong style={{ fontSize: '15px' }}>{c.especialidade}</strong>
+                    </div>
+                    <div style={{ fontSize: '14px', color: 'var(--foreground)' }}>
+                      <strong>{c.medicoNome}</strong> • Data: <strong>{c.data}</strong> às <strong>{c.hora}</strong>
+                    </div>
+                    {c.observacao && (
+                      <div style={{ fontSize: '13px', color: 'var(--muted-foreground)', marginTop: '4px' }}>
+                        Anotação: {c.observacao}
+                      </div>
+                    )}
+                  </div>
+
+                  <button 
+                    className="btn btn-danger" 
+                    style={{ padding: '7px 14px', fontSize: '13px' }}
+                    onClick={() => handleTentativaCancelamento(c)}
+                  >
+                    Cancelar Consulta
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
       )}
 
-      {/* Tab 2: Busca */}
+      {/* Tab 2: Busca de Médicos */}
       {activeTab === 'busca' && (
         <div className="clean-card">
-          <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>Pesquisa de Profissionais Especializados (RF-07)</h4>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 240px', gap: '14px', marginBottom: '20px' }}>
-            <div style={{ position: 'relative' }}>
-              <Search size={18} style={{ position: 'absolute', left: '14px', top: '12px', color: 'var(--muted-foreground)' }} />
-              <input 
-                type="text" 
-                placeholder="Busque por nome ou especialidade..." 
-                value={termoBusca}
-                onChange={e => setTermoBusca(e.target.value)}
-                style={{ paddingLeft: '42px' }}
-              />
-            </div>
-            <select value={filtroEspecBusca} onChange={e => setFiltroEspecBusca(e.target.value)}>
-              <option value="">Todas as Especialidades</option>
+          <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
+            <input 
+              type="text" 
+              placeholder="Pesquisar por nome de especialista ou especialidade clínica..." 
+              value={termoBusca}
+              onChange={e => setTermoBusca(e.target.value)}
+              style={{ flex: 1, minWidth: '220px' }}
+            />
+            <select 
+              value={filtroEspecBusca} 
+              onChange={e => setFiltroEspecBusca(e.target.value)}
+              style={{ width: '220px' }}
+            >
+              <option value="">Todas as Especialidades ({especialidades.length})</option>
               {especialidades.map(e => <option key={e} value={e}>{e}</option>)}
             </select>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-            {medicos
-              .filter(m => !filtroEspecBusca || m.especialidade === filtroEspecBusca)
-              .filter(m => !termoBusca || m.nome.toLowerCase().includes(termoBusca.toLowerCase()) || m.especialidade.toLowerCase().includes(termoBusca.toLowerCase()))
-              .map(m => (
-                <div key={m.id} style={{ padding: '18px', borderRadius: '12px', backgroundColor: 'var(--secondary)', border: '1px solid var(--border)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <h5 style={{ fontSize: '15px', fontWeight: '700' }}>{m.nome}</h5>
-                      <span className="badge badge-CONFIRMADA" style={{ marginTop: '6px' }}>{m.especialidade}</span>
+          {medicosParaExibir.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--muted-foreground)' }}>
+              <p style={{ fontSize: '14px' }}>Nenhum médico encontrado com esse filtro.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+              {medicosParaExibir.map(m => (
+                <div key={m.id} style={{
+                  border: '1px solid var(--card-border)',
+                  borderRadius: 'var(--radius)',
+                  padding: '16px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}>
+                  <div>
+                    <h4 style={{ fontSize: '15px', fontWeight: '600' }}>{m.nome}</h4>
+                    <span style={{ fontSize: '13px', color: 'var(--primary)', fontWeight: '500' }}>{m.especialidade}</span>
+                    <div style={{ fontSize: '13px', color: 'var(--muted-foreground)', marginTop: '8px', lineHeight: '1.5' }}>
+                      <div>Registro CRM: {m.crm}</div>
+                      <div>Valor Consulta: <strong style={{ color: 'var(--foreground)' }}>R$ {m.valorConsulta?.toFixed(2)}</strong></div>
                     </div>
-                    <strong style={{ color: 'var(--primary)', fontSize: '15px' }}>R$ {m.valorConsulta?.toFixed(2)}</strong>
                   </div>
-                  <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '10px' }}>CRM: {m.crm}</p>
-                  <div style={{ marginTop: '12px', borderTop: '1px solid var(--border)', paddingTop: '10px' }}>
-                    <small style={{ fontSize: '11px', color: 'var(--muted-foreground)', fontWeight: '600' }}>DIAS DE ATENDIMENTO:</small>
-                    <p style={{ fontSize: '12px', fontWeight: '600', marginTop: '2px', color: 'var(--foreground)' }}>{m.diasAtendimento?.join(', ')}</p>
-                  </div>
+
                   <button 
-                    className="btn btn-primary" 
-                    style={{ width: '100%', marginTop: '14px', padding: '9px' }}
+                    className="btn btn-secondary" 
+                    style={{ width: '100%', marginTop: '4px', fontWeight: '600', color: 'var(--primary)' }}
                     onClick={() => {
-                      setSelMedicoId(m.id);
                       setSelEspec(m.especialidade);
+                      setSelMedicoId(m.id);
                       setShowModal(true);
                     }}
                   >
-                    Agendar com Dr(a). {m.nome.split(' ')[1] || m.nome.split(' ')[0]}
+                    Marcar Consulta →
                   </button>
                 </div>
               ))}
-          </div>
+            </div>
+          )}
         </div>
       )}
 
       {/* Tab 3: Histórico e Prontuários */}
       {activeTab === 'historico' && (
         <div className="clean-card">
-          <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>Histórico de Consultas Realizadas & Prontuários Digitais (RF-11)</h4>
-          <div style={{ overflowX: 'auto' }}>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Data & Hora</th>
-                  <th>Especialidade</th>
-                  <th>Médico</th>
-                  <th>Status</th>
-                  <th>Prontuário Médico (RF-06 / RF-11)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {historicoConcluido.map(c => (
-                  <tr key={c.id}>
-                    <td style={{ fontWeight: '600' }}>{c.data} às {c.hora}</td>
-                    <td>{c.especialidade}</td>
-                    <td>{c.medicoNome}</td>
-                    <td><span className={`badge badge-${c.status}`}>{c.status}</span></td>
-                    <td>
-                      {c.prontuario ? (
-                        <button 
-                          className="btn btn-secondary" 
-                          style={{ padding: '6px 14px', fontSize: '12px' }}
-                          onClick={() => setSelectedProntuario(c)}
-                        >
-                          <FileText size={14} />
-                          Ver Laudo & Prescrição
-                        </button>
-                      ) : (
-                        <span style={{ fontSize: '12px', color: 'var(--muted-foreground)' }}>
-                          {c.status === 'CANCELADA' ? 'Consulta cancelada' : 'Registro não disponível'}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div style={{ marginBottom: '16px' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600' }}>Histórico de Atendimentos e Laudos (RF-11)</span>
           </div>
+
+          {historicoConcluido.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--muted-foreground)' }}>
+              <p style={{ fontSize: '14px' }}>Nenhum prontuário registrado no seu histórico até o momento.</p>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {historicoConcluido.map(c => (
+                <div key={c.id} style={{
+                  border: '1px solid var(--card-border)',
+                  borderRadius: 'var(--radius)',
+                  padding: '16px 20px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  flexWrap: 'wrap',
+                  gap: '12px'
+                }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <span className={`badge badge-${c.status}`}>{c.status}</span>
+                      <strong style={{ fontSize: '14px' }}>{c.especialidade} com {c.medicoNome}</strong>
+                    </div>
+                    <span style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>
+                      Atendido em: {c.data} às {c.hora}
+                    </span>
+                  </div>
+
+                  {c.prontuario ? (
+                    <button 
+                      className="btn btn-secondary" 
+                      style={{ fontWeight: '600', color: 'var(--primary)' }}
+                      onClick={() => setSelectedProntuario({ ...c.prontuario, consulta: c })}
+                    >
+                      <FileText size={15} /> Ver Prontuário & Laudo
+                    </button>
+                  ) : (
+                    <span style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>Sem laudo emitido</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* Modal: Agendamento */}
+      {/* Modal de Agendamento */}
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '700' }}>Agendar Consulta Médica (RF-03)</h4>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted-foreground)' }}>
-                <X size={20} />
-              </button>
+        <div className="modal-overlay animate-fade-in" onClick={() => setShowModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Agendar Consulta Médica (RF-03)</h3>
+              <button className="btn btn-secondary" style={{ padding: '4px 8px' }} onClick={() => setShowModal(false)}>✕</button>
             </div>
 
-            {erroAg && <div style={{ padding: '10px 14px', backgroundColor: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }}>{erroAg}</div>}
+            {erroAg && (
+              <div style={{ padding: '10px', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: '6px', fontSize: '13px', marginBottom: '14px' }}>
+                {erroAg}
+              </div>
+            )}
 
             <form onSubmit={handleConfirmarAgendamento} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>1. Selecione a Especialidade:</label>
-                <select value={selEspec} onChange={e => { setSelEspec(e.target.value); setSelMedicoId(''); }}>
-                  <option value="">-- Escolha uma especialidade --</option>
+                <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Especialidade Médica *</label>
+                <select value={selEspec} onChange={e => { setSelEspec(e.target.value); setSelMedicoId(''); }} required>
+                  <option value="">Selecione a especialidade...</option>
                   {especialidades.map(e => <option key={e} value={e}>{e}</option>)}
                 </select>
               </div>
 
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>2. Selecione o Médico Especialista:</label>
-                <select value={selMedicoId} onChange={e => setSelMedicoId(e.target.value)} disabled={!selEspec && medicosFiltradosEspec.length > 3}>
-                  <option value="">-- Escolha o profissional --</option>
+                <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Médico(a) Responsável *</label>
+                <select value={selMedicoId} onChange={e => setSelMedicoId(e.target.value)} required disabled={!selEspec && medicosFiltradosEspec.length === 0}>
+                  <option value="">Selecione o profissional...</option>
                   {medicosFiltradosEspec.map(m => (
-                    <option key={m.id} value={m.id}>{m.nome} — R$ {m.valorConsulta?.toFixed(2)}</option>
+                    <option key={m.id} value={m.id}>
+                      {m.nome} ({m.especialidade}) — R$ {m.valorConsulta?.toFixed(2)}
+                    </option>
                   ))}
                 </select>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>3. Data do Atendimento:</label>
+                  <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Data da Consulta *</label>
                   <input type="date" value={selData} min={getTomorrowDate()} onChange={e => setSelData(e.target.value)} required />
                 </div>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>4. Horário Livre:</label>
+                  <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Horário *</label>
                   <select value={selHora} onChange={e => setSelHora(e.target.value)} required disabled={!selMedicoId}>
-                    <option value="">-- Horário --</option>
-                    {(medicoSelecionado?.gradeHoraria || ['08:00', '09:00', '10:00', '14:00', '15:00', '16:00']).map(h => (
+                    <option value="">Selecione o horário</option>
+                    {(medicoSelecionado?.gradeHoraria || ['08:00', '09:00', '10:00', '14:00', '15:00', '16:00', '17:00']).map(h => (
                       <option key={h} value={h}>{h}</option>
                     ))}
                   </select>
@@ -319,68 +387,55 @@ export default function PatientView({ user, consultas, medicos, especialidades, 
               </div>
 
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Observações / Sintomas:</label>
-                <textarea rows={3} value={obs} onChange={e => setObs(e.target.value)} placeholder="Descreva brevemente o motivo da consulta..." />
+                <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Observações (Sintomas ou motivo do agendamento)</label>
+                <textarea rows={2} placeholder="Descreva brevemente seus sintomas..." value={obs} onChange={e => setObs(e.target.value)} />
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
-                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Cancelar</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 2 }}>Confirmar Agendamento</button>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, fontWeight: '600' }}>
+                  Confirmar Agendamento →
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Modal: Prontuário */}
+      {/* Modal do Prontuário */}
       {selectedProntuario && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <FileText size={20} color="var(--primary)" />
-                <h4 style={{ fontSize: '16px', fontWeight: '700' }}>Prontuário Eletrônico Assinado</h4>
-              </div>
-              <span className="badge badge-CONCLUIDA">Assinatura Digital Verificada</span>
+        <div className="modal-overlay animate-fade-in" onClick={() => setSelectedProntuario(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Prontuário e Laudo Digital (RF-11)</h3>
+              <button className="btn btn-secondary" style={{ padding: '4px 8px' }} onClick={() => setSelectedProntuario(null)}>✕</button>
             </div>
 
-            <div style={{ backgroundColor: 'var(--secondary)', padding: '14px 16px', borderRadius: '8px', marginBottom: '16px', fontSize: '13px', border: '1px solid var(--border)' }}>
-              <p style={{ marginBottom: '4px' }}><strong>Paciente:</strong> {selectedProntuario.pacienteNome}</p>
-              <p style={{ marginBottom: '4px' }}><strong>Médico Responsável:</strong> {selectedProntuario.medicoNome} ({selectedProntuario.especialidade})</p>
-              <p><strong>Data do Atendimento:</strong> {selectedProntuario.data}</p>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '14px', color: 'var(--foreground)' }}>
               <div>
-                <strong style={{ fontSize: '12px', color: 'var(--primary)', letterSpacing: '0.03em' }}>ANAMNESE / QUEIXA RELATADA:</strong>
-                <p style={{ backgroundColor: 'var(--secondary)', padding: '12px', borderRadius: '8px', fontSize: '13px', marginTop: '4px', whiteSpace: 'pre-line', border: '1px solid var(--border)' }}>
-                  {selectedProntuario.prontuario.anamnese}
-                </p>
+                <span style={{ fontSize: '12px', color: 'var(--muted-foreground)', display: 'block', marginBottom: '2px' }}>ANAMNESE E HISTÓRICO CLÍNICO</span>
+                <p style={{ background: 'var(--secondary)', padding: '12px', borderRadius: '6px' }}>{selectedProntuario.anamnese}</p>
               </div>
-
               <div>
-                <strong style={{ fontSize: '12px', color: 'var(--primary)', letterSpacing: '0.03em' }}>DIAGNÓSTICO (CID-10):</strong>
-                <p style={{ backgroundColor: 'var(--secondary)', padding: '12px', borderRadius: '8px', fontSize: '13px', marginTop: '4px', fontWeight: '600', border: '1px solid var(--border)' }}>
-                  {selectedProntuario.prontuario.diagnostico}
-                </p>
+                <span style={{ fontSize: '12px', color: 'var(--muted-foreground)', display: 'block', marginBottom: '2px' }}>DIAGNÓSTICO OFICIAL (CID-10)</span>
+                <p style={{ fontWeight: '600', color: 'var(--primary)', background: 'var(--primary-light)', padding: '10px 12px', borderRadius: '6px' }}>{selectedProntuario.diagnostico}</p>
               </div>
-
               <div>
-                <strong style={{ fontSize: '12px', color: 'var(--primary)', letterSpacing: '0.03em' }}>PRESCRIÇÃO MÉDICA & RECOMENDAÇÕES:</strong>
-                <p style={{ backgroundColor: 'var(--secondary)', padding: '12px', borderRadius: '8px', fontSize: '13px', marginTop: '4px', whiteSpace: 'pre-line', border: '1px solid var(--border)' }}>
-                  {selectedProntuario.prontuario.prescricao}
-                </p>
+                <span style={{ fontSize: '12px', color: 'var(--muted-foreground)', display: 'block', marginBottom: '2px' }}>PRESCRIÇÃO CLÍNICA / TRATAMENTO</span>
+                <p style={{ whiteSpace: 'pre-line', background: 'var(--secondary)', padding: '12px', borderRadius: '6px' }}>{selectedProntuario.prescricao}</p>
               </div>
             </div>
 
-            <div style={{ marginTop: '20px', textAlign: 'right', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
-              <button className="btn btn-primary" onClick={() => setSelectedProntuario(null)}>
-                Fechar Prontuário
-              </button>
+            <div style={{ marginTop: '20px', borderTop: '1px solid var(--card-border)', paddingTop: '12px', fontSize: '12px', color: 'var(--muted-foreground)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>🩺 Assinado por: <strong style={{ color: 'var(--foreground)' }}>{selectedProntuario.consulta?.medicoNome}</strong></span>
+              <span>Emitido em: {selectedProntuario.dataRegistro}</span>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }

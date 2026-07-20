@@ -1,40 +1,29 @@
-// Componente Footer (Créditos Acadêmicos e Matrículas)
-// MedAgenda - UFPA 2026.1 - Design Corporativo Limpo
+// Componente Footer (Minimalista e Elegante — UFPA 2026.1)
+// MedAgenda - Sistema de Agendamento e Prontuário Médico
 import React from 'react';
+import { Activity } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="credits-banner">
-      <p style={{ fontWeight: '600', color: 'var(--foreground)' }}>
-        MedAgenda — Trabalho Final (T3) de Engenharia de Software I — UFPA 2026.1
-      </p>
-      <p style={{ fontSize: '12px', color: 'var(--muted-foreground)', marginTop: '4px' }}>
-        Arquitetura: React.js (SPA Frontend) • Node.js/Express (API REST) • Prisma ORM & PostgreSQL
-      </p>
-      
-      <div className="credits-names" style={{ marginTop: '14px', fontSize: '13px' }}>
-        <span>Carlos Eduardo Vitelli da Silva (202406840030)</span>
-        <span style={{ color: 'var(--border)' }}>|</span>
-        <span>Gabriel Xavier Vieira do Nascimento (202007040030)</span>
-        <span style={{ color: 'var(--border)' }}>|</span>
-        <span>Kayky Gonçalves Feio (202406840021)</span>
+    <footer style={{
+      background: 'var(--card-bg)',
+      borderTop: '1px solid var(--card-border)',
+      marginTop: 'auto',
+      padding: '24px',
+      color: 'var(--muted-foreground)',
+      fontSize: '13px'
+    }}>
+      <div style={{ maxWidth: '1040px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Activity size={16} color="var(--primary)" />
+          <span style={{ fontWeight: '600', color: 'var(--foreground)' }}>MedAgenda</span>
+          <span>• UFPA 2026.1 (Engenharia de Software I)</span>
+        </div>
+
+        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+          <span>Autores: Carlos Eduardo Vitelli, Gabriel Xavier e Kayky Feio</span>
+        </div>
       </div>
-
-      <p style={{ fontSize: '12px', marginTop: '10px' }}>
-        <span style={{ fontWeight: '600', color: 'var(--foreground)' }}>Repositório GitHub:</span>{' '}
-        <a 
-          href="https://github.com/gabrielx213/Eng_soft_trabalho_final" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          style={{ color: 'var(--primary)', textDecoration: 'none', fontWeight: '600' }}
-        >
-          github.com/gabrielx213/Eng_soft_trabalho_final
-        </a>
-      </p>
-
-      <p style={{ fontSize: '11px', marginTop: '6px', color: 'var(--muted-foreground)' }}>
-        Prof. Me. Julio Leite Azancort Neto • Instituto de Ciências Exatas e Naturais — Faculdade de Computação (UFPA)
-      </p>
     </footer>
   );
 }

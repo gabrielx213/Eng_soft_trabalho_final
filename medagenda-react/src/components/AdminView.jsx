@@ -1,13 +1,13 @@
-// Componente AdminView (Painel Administrativo - RF-09 Cadastro de Médico e RF-10 Indicadores & Gráficos Chart.js)
-// MedAgenda - UFPA 2026.1 - Design Corporativo Limpo (Estilo SIDAMA)
+// Componente AdminView (Painel Minimalista Executivo - RF-09 e RF-10)
+// MedAgenda - UFPA 2026.1
 import React, { useState } from 'react';
-import { BarChart, Users, Activity, CheckCircle, XCircle, UserPlus, Download, TrendingUp, PieChart, Stethoscope, X } from 'lucide-react';
+import { BarChart, Users, Activity, CheckCircle2, XCircle, UserPlus, Download } from 'lucide-react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
 import { Bar, Doughnut } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
-export default function AdminView({ kpis, medicos, especialidades, onCadastrarMedico, theme }) {
+export default function AdminView({ kpis, medicos, especialidades, onCadastrarMedico, theme, onShowToast }) {
   const [showModalMedico, setShowModalMedico] = useState(false);
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
@@ -18,25 +18,26 @@ export default function AdminView({ kpis, medicos, especialidades, onCadastrarMe
   const [valorConsulta, setValorConsulta] = useState(250);
   const [erroMed, setErroMed] = useState('');
 
-  // Configurações de Gráficos Chart.js (RF-10)
+  // Confirmação inline
+  const [msgSucessoInline, setMsgSucessoInline] = useState('');
+
   const isDark = theme === 'dark';
   const textColor = isDark ? '#E2E8F0' : '#1E293B';
   const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
 
-  // Gráfico 1: Distribuição por Status (Doughnut)
+  // Gráfico 1: Doughnut
   const doughnutData = {
     labels: ['Concluídas', 'Confirmadas / Agendadas', 'Canceladas'],
     datasets: [
       {
         data: [kpis.concluidas, kpis.confirmadas, kpis.canceladas],
-        backgroundColor: ['#10b981', '#0284c7', '#ef4444'],
-        borderWidth: 0,
-        hoverOffset: 6
+        backgroundColor: ['#059669', '#0284c7', '#dc2626'],
+        borderWidth: 0
       }
     ]
   };
 
-  // Gráfico 2: Médicos cadastrados por Especialidade (Barra)
+  // Gráfico 2: Barra
   const especContagem = {};
   especialidades.forEach(e => {
     especContagem[e] = medicos.filter(m => m.especialidade === e).length;
@@ -46,12 +47,10 @@ export default function AdminView({ kpis, medicos, especialidades, onCadastrarMe
     labels: Object.keys(especContagem),
     datasets: [
       {
-        label: 'Profissionais Específicos',
+        label: 'Profissionais no Corpo Clínico',
         data: Object.values(especContagem),
-        backgroundColor: 'rgba(2, 132, 199, 0.8)',
-        borderColor: '#0284c7',
-        borderWidth: 1,
-        borderRadius: 6
+        backgroundColor: '#0284c7',
+        borderRadius: 4
       }
     ]
   };
@@ -60,7 +59,7 @@ export default function AdminView({ kpis, medicos, especialidades, onCadastrarMe
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { labels: { color: textColor, font: { family: 'Plus Jakarta Sans', size: 12 } } }
+      legend: { labels: { color: textColor, font: { family: 'Inter', size: 12 } } }
     },
     scales: {
       x: { ticks: { color: textColor }, grid: { color: gridColor } },
@@ -71,23 +70,26 @@ export default function AdminView({ kpis, medicos, especialidades, onCadastrarMe
   async function handleNovoMedico(e) {
     e.preventDefault();
     setErroMed('');
+    setMsgSucessoInline('');
     if (!nome || !email || !crm) {
       setErroMed('Preencha Nome, E-mail e CRM.');
       return;
     }
     try {
-      await onCadastrarMedico({
+      const especialidadeFinal = especialidade === 'NOVA' ? novaEspec : especialidade;
+      const novo = await onCadastrarMedico({
         nome,
         email,
         senha,
         crm,
-        especialidade: especialidade === 'NOVA' ? novaEspec : especialidade,
+        especialidade: especialidadeFinal,
         valorConsulta: Number(valorConsulta)
       });
       setShowModalMedico(false);
       setNome('');
       setEmail('');
       setCrm('');
+      setMsgSucessoInline(`✓ Dr(a). ${novo.nome} (${novo.especialidade} - CRM ${novo.crm}) cadastrado(a) e adicionado(a) ao corpo clínico com sucesso! (RF-09 confirmado)`);
     } catch (err) {
       setErroMed(err.message || 'Erro ao cadastrar médico.');
     }
@@ -95,13 +97,15 @@ export default function AdminView({ kpis, medicos, especialidades, onCadastrarMe
 
   function handleExportarRelatorio() {
     const conteudo = `RELATORIO GERENCIAL MEDAGENDA - UFPA 2026.1
-Total de Consultas: ${kpis.totalConsultas}
-Consultas Concluidas: ${kpis.concluidas}
-Consultas Confirmadas: ${kpis.confirmadas}
+==================================================
+Data da Emissao: ${new Date().toLocaleString('pt-BR')}
+Total Geral de Consultas Registradas: ${kpis.totalConsultas}
+Consultas Concluidas com Prontuario Digital: ${kpis.concluidas}
+Consultas Confirmadas / Agendadas na Fila: ${kpis.confirmadas}
 Consultas Canceladas: ${kpis.canceladas}
-Taxa de Cancelamento: ${kpis.taxaCancelamento}%
-Taxa de Ocupacao: ${kpis.taxaOcupacao}%
-Tecnologias: React.js, Node.js, Express, Prisma ORM, PostgreSQL`;
+Taxa Oficial de Cancelamento: ${kpis.taxaCancelamento}%
+Taxa Estimada de Ocupacao: ${kpis.taxaOcupacao}%
+Corpo Clinico Ativo: ${medicos.length} medicos cadastrados`;
 
     const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -109,121 +113,121 @@ Tecnologias: React.js, Node.js, Express, Prisma ORM, PostgreSQL`;
     a.href = url;
     a.download = `relatorio_gerencial_medagenda_${Date.now()}.txt`;
     a.click();
+    onShowToast?.('Relatório gerencial exportado com sucesso (.txt)!', 'success');
   }
 
   return (
-    <div style={{ maxWidth: '1150px', margin: '24px auto', padding: '0 16px' }}>
-      {/* Top Banner */}
-      <div className="clean-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
+    <div className="animate-fade-in" style={{ maxWidth: '1040px', margin: '24px auto', padding: '0 24px' }}>
+      
+      {/* Cabeçalho Minimalista */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <BarChart size={20} color="var(--primary)" />
-            <h3 style={{ fontSize: '18px', fontWeight: '700' }}>Painel Gerencial & KPIs da Clínica (RF-09 / RF-10)</h3>
-          </div>
-          <p style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>Controle do corpo clínico, estatísticas de agendamento e ocupação em tempo real.</p>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--foreground)' }}>
+            Painel Executivo & KPIs Gerenciais
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--muted-foreground)', marginTop: '2px' }}>
+            Indicadores clínicos em tempo real e gestão do corpo médico (RF-09 / RF-10)
+          </p>
         </div>
+
         <div style={{ display: 'flex', gap: '10px' }}>
           <button className="btn btn-secondary" onClick={handleExportarRelatorio}>
-            <Download size={16} />
-            Exportar Relatório (RF-10)
+            <Download size={15} /> Exportar Relatório TXT
           </button>
           <button className="btn btn-primary" onClick={() => setShowModalMedico(true)}>
-            <UserPlus size={16} />
-            Cadastrar Médico (RF-09)
+            <UserPlus size={15} /> Cadastrar Médico (RF-09)
           </button>
         </div>
       </div>
 
-      {/* 4 Cards de KPIs Gerenciais (RF-10) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <div className="clean-card" style={{ padding: '20px' }}>
-          <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--muted-foreground)', letterSpacing: '0.04em' }}>TOTAL DE CONSULTAS</span>
-          <div style={{ fontSize: '28px', fontWeight: '800', marginTop: '8px', marginBottom: '6px', color: 'var(--foreground)' }}>{kpis.totalConsultas}</div>
-          <small style={{ fontSize: '12px', color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Activity size={14} color="var(--primary)" /> Fluxo integral da clínica
-          </small>
+      {/* Alerta de Sucesso Inline (Cadastro de Médico) */}
+      {msgSucessoInline && (
+        <div className="animate-slide-in" style={{
+          padding: '14px 18px',
+          borderRadius: 'var(--radius)',
+          background: 'var(--success-bg)',
+          color: 'var(--success)',
+          border: '1px solid var(--success)',
+          marginBottom: '20px',
+          fontWeight: '500',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCircle2 size={18} />
+            <span>{msgSucessoInline}</span>
+          </div>
+          <button onClick={() => setMsgSucessoInline('')} style={{ background: 'transparent', border: 'none', color: 'var(--success)', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
+        </div>
+      )}
+
+      {/* 4 Cards de KPIs Gerenciais */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+        <div className="clean-card">
+          <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted-foreground)' }}>TOTAL GERAL CONSULTAS</span>
+          <div style={{ fontSize: '28px', fontWeight: '700', marginTop: '6px', color: 'var(--foreground)' }}>{kpis.totalConsultas}</div>
         </div>
 
-        <div className="clean-card" style={{ padding: '20px' }}>
-          <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--muted-foreground)', letterSpacing: '0.04em' }}>ATENDIMENTOS CONCLUÍDOS</span>
-          <div style={{ fontSize: '28px', fontWeight: '800', marginTop: '8px', marginBottom: '6px', color: 'var(--success)' }}>{kpis.concluidas}</div>
-          <small style={{ fontSize: '12px', color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <CheckCircle size={14} color="var(--success)" /> Com prontuário assinado
-          </small>
+        <div className="clean-card">
+          <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted-foreground)' }}>ATENDIMENTOS CONCLUÍDOS</span>
+          <div style={{ fontSize: '28px', fontWeight: '700', marginTop: '6px', color: 'var(--success)' }}>{kpis.concluidas}</div>
         </div>
 
-        <div className="clean-card" style={{ padding: '20px' }}>
-          <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--muted-foreground)', letterSpacing: '0.04em' }}>TAXA DE CANCELAMENTO</span>
-          <div style={{ fontSize: '28px', fontWeight: '800', marginTop: '8px', marginBottom: '6px', color: 'var(--danger)' }}>{kpis.taxaCancelamento}%</div>
-          <small style={{ fontSize: '12px', color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <XCircle size={14} color="var(--danger)" /> Requisito RF-04 monitorado
-          </small>
+        <div className="clean-card">
+          <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted-foreground)' }}>TAXA DE CANCELAMENTO</span>
+          <div style={{ fontSize: '28px', fontWeight: '700', marginTop: '6px', color: 'var(--danger)' }}>{kpis.taxaCancelamento}%</div>
         </div>
 
-        <div className="clean-card" style={{ padding: '20px' }}>
-          <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--muted-foreground)', letterSpacing: '0.04em' }}>TAXA DE OCUPAÇÃO DA CLÍNICA</span>
-          <div style={{ fontSize: '28px', fontWeight: '800', marginTop: '8px', marginBottom: '6px', color: 'var(--primary)' }}>{kpis.taxaOcupacao}%</div>
-          <small style={{ fontSize: '12px', color: 'var(--muted-foreground)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <TrendingUp size={14} color="var(--primary)" /> Grade horária otimizada
-          </small>
+        <div className="clean-card">
+          <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted-foreground)' }}>TAXA DE OCUPAÇÃO</span>
+          <div style={{ fontSize: '28px', fontWeight: '700', marginTop: '6px', color: 'var(--primary)' }}>{kpis.taxaOcupacao}%</div>
         </div>
       </div>
 
-      {/* Gráficos Chart.js Interativos (RF-10) */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(480px, 1fr))', gap: '20px', marginBottom: '24px' }}>
-        <div className="clean-card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
-            <PieChart size={18} color="var(--primary)" />
-            <h4 style={{ fontSize: '15px', fontWeight: '600' }}>Distribuição de Consultas por Status (Chart.js)</h4>
-          </div>
-          <div style={{ height: '260px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } }} />
+      {/* Gráficos Interativos */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+        <div className="clean-card" style={{ height: '320px', display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '15px', fontWeight: '600', marginBottom: '14px' }}>Distribuição de Consultas (RF-10)</span>
+          <div style={{ flex: 1, position: 'relative' }}>
+            <Doughnut data={doughnutData} options={chartOptions} />
           </div>
         </div>
 
-        <div className="clean-card">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '10px' }}>
-            <BarChart size={18} color="var(--primary)" />
-            <h4 style={{ fontSize: '15px', fontWeight: '600' }}>Corpo Clínico por Especialidade Médica</h4>
-          </div>
-          <div style={{ height: '260px' }}>
+        <div className="clean-card" style={{ height: '320px', display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '15px', fontWeight: '600', marginBottom: '14px' }}>Especialistas por Área Clínica (RF-07)</span>
+          <div style={{ flex: 1, position: 'relative' }}>
             <Bar data={barData} options={chartOptions} />
           </div>
         </div>
       </div>
 
-      {/* Tabela do Corpo Clínico Cadastrado (RF-09) */}
+      {/* Tabela de Médicos */}
       <div className="clean-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Users size={18} color="var(--primary)" />
-            <h4 style={{ fontSize: '16px', fontWeight: '600' }}>Corpo Clínico Cadastrado (RF-09)</h4>
-          </div>
-          <span className="badge badge-CONFIRMADA">{medicos.length} Especialistas Ativos</span>
+        <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: '15px', fontWeight: '600' }}>Corpo Clínico Cadastrado ({medicos.length} profissionais)</span>
+          <span style={{ fontSize: '12px', color: 'var(--muted-foreground)' }}>Cadastro via RF-09</span>
         </div>
 
         <div style={{ overflowX: 'auto' }}>
           <table className="data-table">
             <thead>
               <tr>
-                <th>Médico(a)</th>
+                <th>Nome do Médico</th>
                 <th>CRM</th>
                 <th>Especialidade</th>
                 <th>Valor Consulta</th>
-                <th>Dias de Atendimento (Grade RF-12)</th>
+                <th>Dias de Atendimento</th>
               </tr>
             </thead>
             <tbody>
               {medicos.map(m => (
                 <tr key={m.id}>
-                  <td>
-                    <strong style={{ fontWeight: '600', color: 'var(--foreground)' }}>{m.nome}</strong><br />
-                    <small style={{ color: 'var(--muted-foreground)' }}>{m.email}</small>
-                  </td>
-                  <td><span style={{ fontWeight: '600', color: 'var(--primary)' }}>{m.crm}</span></td>
+                  <td><strong style={{ fontSize: '15px' }}>{m.nome}</strong></td>
+                  <td style={{ color: 'var(--muted-foreground)' }}>{m.crm}</td>
                   <td><span className="badge badge-CONFIRMADA">{m.especialidade}</span></td>
                   <td style={{ fontWeight: '600' }}>R$ {m.valorConsulta?.toFixed(2)}</td>
-                  <td style={{ fontSize: '13px' }}>{m.diasAtendimento?.join(', ')}</td>
+                  <td style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>{(m.diasAtendimento || ['Segunda a Sexta']).join(', ')}</td>
                 </tr>
               ))}
             </tbody>
@@ -231,52 +235,51 @@ Tecnologias: React.js, Node.js, Express, Prisma ORM, PostgreSQL`;
         </div>
       </div>
 
-      {/* Modal de Cadastrar Médico (RF-09) */}
+      {/* Modal Cadastro Médico */}
       {showModalMedico && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Stethoscope size={20} color="var(--primary)" />
-                <h4 style={{ fontSize: '16px', fontWeight: '700' }}>Cadastrar Novo Médico (RF-09)</h4>
-              </div>
-              <button onClick={() => setShowModalMedico(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted-foreground)' }}>
-                <X size={20} />
-              </button>
+        <div className="modal-overlay animate-fade-in" onClick={() => setShowModalMedico(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Cadastrar Novo Médico (RF-09)</h3>
+              <button className="btn btn-secondary" style={{ padding: '4px 8px' }} onClick={() => setShowModalMedico(false)}>✕</button>
             </div>
 
-            {erroMed && <div style={{ padding: '10px 14px', backgroundColor: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }}>{erroMed}</div>}
+            {erroMed && (
+              <div style={{ padding: '10px', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: '6px', fontSize: '13px', marginBottom: '14px' }}>
+                {erroMed}
+              </div>
+            )}
 
             <form onSubmit={handleNovoMedico} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Nome do Médico:</label>
-                <input type="text" value={nome} onChange={e => setNome(e.target.value)} required placeholder="ex: Dr. Lucas Martins" />
+                <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Nome Completo do Médico *</label>
+                <input type="text" value={nome} onChange={e => setNome(e.target.value)} required placeholder="Dr. Lucas Prado" />
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>E-mail Institucional:</label>
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="lucas@medagenda.com" />
+                  <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>E-mail *</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="lucas@clinica.com" />
                 </div>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Senha Inicial:</label>
+                  <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Senha *</label>
                   <input type="password" value={senha} onChange={e => setSenha(e.target.value)} required />
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Registro CRM:</label>
-                  <input type="text" value={crm} onChange={e => setCrm(e.target.value)} required placeholder="CRM/PA 99999" />
+                  <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>CRM *</label>
+                  <input type="text" value={crm} onChange={e => setCrm(e.target.value)} required placeholder="CRM/PA 99887" />
                 </div>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Valor da Consulta (R$):</label>
-                  <input type="number" value={valorConsulta} onChange={e => setValorConsulta(e.target.value)} required step="10" />
+                  <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Valor Consulta (R$) *</label>
+                  <input type="number" step="0.01" value={valorConsulta} onChange={e => setValorConsulta(e.target.value)} required />
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Especialidade Médica:</label>
+                <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Especialidade *</label>
                 <select value={especialidade} onChange={e => setEspecialidade(e.target.value)}>
                   {especialidades.map(e => <option key={e} value={e}>{e}</option>)}
                   <option value="NOVA">+ Cadastrar Nova Especialidade</option>
@@ -285,19 +288,24 @@ Tecnologias: React.js, Node.js, Express, Prisma ORM, PostgreSQL`;
 
               {especialidade === 'NOVA' && (
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px', color: 'var(--primary)' }}>Nome da Nova Especialidade:</label>
-                  <input type="text" value={novaEspec} onChange={e => setNovaEspec(e.target.value)} required placeholder="ex: Oftalmologia ou Neurologia" />
+                  <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Nova Especialidade Clínica:</label>
+                  <input type="text" value={novaEspec} onChange={e => setNovaEspec(e.target.value)} required placeholder="ex: Neurologia" />
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
-                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowModalMedico(false)}>Cancelar</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 2 }}>Confirmar Cadastro</button>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowModalMedico(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, fontWeight: '600' }}>
+                  Concluir Cadastro do Médico →
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 }

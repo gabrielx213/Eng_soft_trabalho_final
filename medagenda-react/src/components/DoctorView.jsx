@@ -1,13 +1,16 @@
-// Componente DoctorView (Painel do Médico - RF-05 Agenda, RF-06 Prontuário e RF-12 Horários)
-// MedAgenda - UFPA 2026.1 - Design Corporativo Limpo (Estilo SIDAMA)
+// Componente DoctorView (Painel Minimalista do Médico - RF-05, RF-06 e RF-12)
+// MedAgenda - UFPA 2026.1
 import React, { useState } from 'react';
-import { Calendar, Clock, Stethoscope, Settings, CheckCircle2, FileText, User, X } from 'lucide-react';
+import { Calendar, Clock, Stethoscope, Settings, CheckCircle2, FileText, User } from 'lucide-react';
 
-export default function DoctorView({ user, consultas, onRegistrarProntuario }) {
+export default function DoctorView({ user, consultas, onRegistrarProntuario, onShowToast }) {
   const [activeTab, setActiveTab] = useState('agenda'); // 'agenda', 'horarios'
   const [dataFiltro, setDataFiltro] = useState('');
   const [turnoFiltro, setTurnoFiltro] = useState(''); // '', 'manha', 'tarde'
   
+  // Confirmação Inline
+  const [msgSucessoInline, setMsgSucessoInline] = useState('');
+
   // Modal de Prontuário (RF-06)
   const [consultaSelecionada, setConsultaSelecionada] = useState(null);
   const [anamnese, setAnamnese] = useState('');
@@ -38,6 +41,7 @@ export default function DoctorView({ user, consultas, onRegistrarProntuario }) {
   async function handleSalvarProntuario(e) {
     e.preventDefault();
     setErroPront('');
+    setMsgSucessoInline('');
     if (!anamnese || !diagnostico || !prescricao) {
       setErroPront('Preencha Anamnese, CID-10 e Prescrição para assinar o laudo.');
       return;
@@ -53,6 +57,7 @@ export default function DoctorView({ user, consultas, onRegistrarProntuario }) {
       setAnamnese('');
       setDiagnostico('');
       setPrescricao('');
+      setMsgSucessoInline(`✓ Prontuário de ${consultaSelecionada.pacienteNome} assinado e registrado com sucesso no histórico da clínica (RF-06)!`);
     } catch (err) {
       setErroPront(err.message || 'Erro ao registrar prontuário.');
     }
@@ -64,60 +69,85 @@ export default function DoctorView({ user, consultas, onRegistrarProntuario }) {
     user.diasAtendimento = diasAtendimento;
     user.gradeHoraria = novaGrade;
     setSucessoHorarios(true);
-    setTimeout(() => setSucessoHorarios(false), 3000);
+    onShowToast?.('Grade de horários atualizada com sucesso (RF-12)!', 'success');
+    setTimeout(() => setSucessoHorarios(false), 4000);
   }
 
   return (
-    <div style={{ maxWidth: '1100px', margin: '24px auto', padding: '0 16px' }}>
-      {/* Top Banner */}
-      <div className="clean-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+    <div className="animate-fade-in" style={{ maxWidth: '1040px', margin: '24px auto', padding: '0 24px' }}>
+      
+      {/* Cabeçalho Minimalista */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <Stethoscope size={20} color="var(--primary)" />
-            <h3 style={{ fontSize: '18px', fontWeight: '700' }}>Painel do Médico — Dr(a). {user.nome.split(' ').slice(0, 2).join(' ')}</h3>
-          </div>
-          <p style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>Especialidade: <strong style={{ color: 'var(--foreground)' }}>{user.especialidade}</strong> | CRM: <strong style={{ color: 'var(--foreground)' }}>{user.crm}</strong></p>
+          <h2 style={{ fontSize: '22px', fontWeight: '700', color: 'var(--foreground)' }}>
+            Painel do Médico — {user.nome}
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--muted-foreground)', marginTop: '2px' }}>
+            {user.especialidade} • Registro CRM: {user.crm}
+          </p>
         </div>
-        <div style={{ display: 'flex', gap: '10px' }}>
+
+        <div style={{ display: 'flex', gap: '8px' }}>
           <button 
             className={`btn ${activeTab === 'agenda' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('agenda')}
           >
-            <Calendar size={16} /> Agenda Diária (RF-05)
+            <Calendar size={15} /> Agenda Médica (RF-05)
           </button>
           <button 
             className={`btn ${activeTab === 'horarios' ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setActiveTab('horarios')}
           >
-            <Settings size={16} /> Configurar Horários (RF-12)
+            <Settings size={15} /> Horários de Atendimento (RF-12)
           </button>
         </div>
       </div>
 
+      {/* Alerta Inline de Sucesso (Prontuário assinado) */}
+      {msgSucessoInline && (
+        <div className="animate-slide-in" style={{
+          padding: '14px 18px',
+          borderRadius: 'var(--radius)',
+          background: 'var(--success-bg)',
+          color: 'var(--success)',
+          border: '1px solid var(--success)',
+          marginBottom: '20px',
+          fontWeight: '500',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCircle2 size={18} />
+            <span>{msgSucessoInline}</span>
+          </div>
+          <button onClick={() => setMsgSucessoInline('')} style={{ background: 'transparent', border: 'none', color: 'var(--success)', cursor: 'pointer', fontWeight: 'bold' }}>✕</button>
+        </div>
+      )}
+
       {activeTab === 'agenda' ? (
         <div className="clean-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
-            <h4 style={{ fontSize: '16px', fontWeight: '600' }}>Atendimentos e Agenda Médica</h4>
+            <span style={{ fontSize: '15px', fontWeight: '600' }}>Fila de Atendimentos e Pacientes ({consultasFiltradas.length})</span>
             
-            {/* Filtros da Agenda */}
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
               <input 
                 type="date" 
                 value={dataFiltro} 
                 onChange={e => setDataFiltro(e.target.value)} 
-                style={{ width: 'auto', padding: '6px 12px', fontSize: '13px' }}
+                style={{ width: 'auto', padding: '6px 10px', fontSize: '13px' }}
               />
               <select 
                 value={turnoFiltro} 
                 onChange={e => setTurnoFiltro(e.target.value)}
-                style={{ width: 'auto', padding: '6px 12px', fontSize: '13px' }}
+                style={{ width: 'auto', padding: '6px 10px', fontSize: '13px' }}
               >
                 <option value="">Todos os Turnos</option>
-                <option value="manha">Turno Manhã (&lt; 12h)</option>
-                <option value="tarde">Turno Tarde (≥ 12h)</option>
+                <option value="manha">Manhã (&lt; 12h)</option>
+                <option value="tarde">Tarde (≥ 12h)</option>
               </select>
               {(dataFiltro || turnoFiltro) && (
-                <button className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px' }} onClick={() => { setDataFiltro(''); setTurnoFiltro(''); }}>
+                <button className="btn btn-secondary" style={{ padding: '6px 10px', fontSize: '12px' }} onClick={() => { setDataFiltro(''); setTurnoFiltro(''); }}>
                   Limpar
                 </button>
               )}
@@ -128,9 +158,9 @@ export default function DoctorView({ user, consultas, onRegistrarProntuario }) {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Horário & Data</th>
+                  <th>Horário / Data</th>
                   <th>Paciente</th>
-                  <th>Motivo / Observação</th>
+                  <th>Motivo / Queixa</th>
                   <th>Status</th>
                   <th>Ação Clínica (RF-06)</th>
                 </tr>
@@ -138,43 +168,44 @@ export default function DoctorView({ user, consultas, onRegistrarProntuario }) {
               <tbody>
                 {consultasFiltradas.length === 0 ? (
                   <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--muted-foreground)' }}>
-                      Nenhuma consulta encontrada para o filtro selecionado.
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '32px', color: 'var(--muted-foreground)' }}>
+                      Nenhuma consulta agendada encontrada com esses filtros.
                     </td>
                   </tr>
                 ) : (
                   consultasFiltradas.map(c => (
                     <tr key={c.id}>
                       <td>
-                        <strong style={{ fontSize: '14px', color: 'var(--foreground)' }}>{c.data}</strong><br />
-                        <span style={{ color: 'var(--primary)', fontWeight: '600', fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                          <Clock size={13} /> {c.hora}
-                        </span>
+                        <strong>{c.data}</strong><br />
+                        <span style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>{c.hora}</span>
                       </td>
-                      <td><strong style={{ fontWeight: '600' }}>{c.pacienteNome}</strong></td>
-                      <td style={{ maxWidth: '240px', fontSize: '13px', color: 'var(--muted-foreground)' }}>{c.observacao || '—'}</td>
-                      <td><span className={`badge badge-${c.status}`}>{c.status}</span></td>
                       <td>
-                        {c.status === 'CONFIRMADA' || c.status === 'AGENDADA' ? (
-                          <button 
-                            className="btn btn-primary" 
-                            style={{ padding: '7px 14px', fontSize: '13px' }}
-                            onClick={() => {
-                              setConsultaSelecionada(c);
-                              setAnamnese('');
-                              setDiagnostico('');
-                              setPrescricao('');
-                            }}
-                          >
-                            <Stethoscope size={15} />
-                            Iniciar Prontuário
-                          </button>
-                        ) : c.status === 'CONCLUIDA' ? (
-                          <span style={{ fontSize: '12px', color: 'var(--success)', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <strong style={{ fontSize: '15px' }}>{c.pacienteNome}</strong>
+                      </td>
+                      <td style={{ maxWidth: '240px', fontSize: '13px', color: 'var(--muted-foreground)' }}>
+                        {c.observacao || 'Consulta eletiva normal'}
+                      </td>
+                      <td>
+                        <span className={`badge badge-${c.status}`}>{c.status}</span>
+                      </td>
+                      <td>
+                        {c.status === 'CONCLUIDA' && c.prontuario ? (
+                          <span style={{ fontSize: '13px', color: 'var(--success)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
                             <CheckCircle2 size={15} /> Prontuário Assinado
                           </span>
+                        ) : c.status === 'CANCELADA' ? (
+                          <span style={{ fontSize: '13px', color: 'var(--muted-foreground)' }}>Consulta Cancelada</span>
                         ) : (
-                          <span style={{ fontSize: '12px', color: 'var(--muted-foreground)' }}>Cancelado</span>
+                          <button 
+                            className="btn btn-primary" 
+                            style={{ padding: '6px 14px', fontSize: '13px', fontWeight: '600' }}
+                            onClick={() => {
+                              setConsultaSelecionada(c);
+                              setAnamnese(c.observacao ? `Relato e queixa informada pelo paciente: ${c.observacao}\n\nEvolução clínica: ` : 'Paciente compareceu ao consultório relatando...');
+                            }}
+                          >
+                            Registrar Laudo / CID-10 →
+                          </button>
                         )}
                       </td>
                     </tr>
@@ -185,37 +216,48 @@ export default function DoctorView({ user, consultas, onRegistrarProntuario }) {
           </div>
         </div>
       ) : (
-        /* Aba Configurar Horários (RF-12) */
-        <div className="clean-card" style={{ maxWidth: '640px', margin: '0 auto' }}>
-          <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '14px' }}>Gestão de Horários Disponíveis para Agendamento (RF-12)</h4>
-          <p style={{ fontSize: '13px', color: 'var(--muted-foreground)', marginBottom: '20px' }}>
-            Defina os dias da semana e os intervalos de horários livres que serão disponibilizados no portal dos pacientes.
-          </p>
+        <div className="clean-card" style={{ maxWidth: '640px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <span style={{ fontSize: '15px', fontWeight: '600' }}>Configurar Grade e Dias de Atendimento (RF-12)</span>
+          </div>
 
           {sucessoHorarios && (
-            <div style={{ padding: '12px', backgroundColor: 'var(--success-bg)', color: 'var(--success)', borderRadius: '8px', fontSize: '13px', marginBottom: '16px', textAlign: 'center', fontWeight: '600' }}>
-              Grade horária salva com sucesso no sistema!
+            <div className="animate-fade-in" style={{ padding: '12px 14px', background: 'var(--success-bg)', color: 'var(--success)', borderRadius: '6px', fontSize: '13px', marginBottom: '16px', border: '1px solid var(--success)', fontWeight: '500', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <CheckCircle2 size={16} />
+              ✓ Horários de atendimento e dias da semana salvos e sincronizados com sucesso!
             </div>
           )}
 
           <form onSubmit={handleSalvarHorarios} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '8px' }}>Dias de Atendimento na Clínica:</label>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '8px' }}>
+                Selecione os Dias da Semana Disponíveis:
+              </label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                 {['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'].map(dia => {
-                  const checked = diasAtendimento.includes(dia);
+                  const ativo = diasAtendimento.includes(dia);
                   return (
                     <button
-                      key={dia}
                       type="button"
-                      className={`btn ${checked ? 'btn-primary' : 'btn-secondary'}`}
-                      style={{ padding: '6px 14px', fontSize: '13px' }}
+                      key={dia}
                       onClick={() => {
-                        if (checked) setDiasAtendimento(diasAtendimento.filter(d => d !== dia));
+                        if (ativo) setDiasAtendimento(diasAtendimento.filter(d => d !== dia));
                         else setDiasAtendimento([...diasAtendimento, dia]);
                       }}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '6px',
+                        fontWeight: '500',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        border: '1px solid',
+                        borderColor: ativo ? 'var(--primary)' : 'var(--card-border)',
+                        background: ativo ? 'var(--primary)' : 'transparent',
+                        color: ativo ? '#ffffff' : 'var(--foreground)',
+                        transition: 'all 0.15s ease'
+                      }}
                     >
-                      {dia}
+                      {dia} {ativo && '✓'}
                     </button>
                   );
                 })}
@@ -223,92 +265,68 @@ export default function DoctorView({ user, consultas, onRegistrarProntuario }) {
             </div>
 
             <div>
-              <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Grade Horária (Separada por vírgula):</label>
+              <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>
+                Horários Disponíveis para Marcação (Separados por vírgula):
+              </label>
               <input 
                 type="text" 
                 value={gradeHorariaStr} 
                 onChange={e => setGradeHorariaStr(e.target.value)} 
-                placeholder="08:00, 09:00, 10:00, 14:00, 15:00, 16:00"
+                placeholder="08:00, 09:30, 11:00, 14:00, 15:30, 17:00"
               />
-              <small style={{ fontSize: '11px', color: 'var(--muted-foreground)', marginTop: '4px', display: 'block' }}>
-                Exemplo: 08:00, 09:30, 11:00, 14:30, 16:00
-              </small>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '8px' }}>
-              Salvar Grade de Atendimento
+            <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-start', fontWeight: '600' }}>
+              Salvar Nova Grade de Horários →
             </button>
           </form>
         </div>
       )}
 
-      {/* Modal de Registro de Prontuário (RF-06) */}
+      {/* Modal Prontuário */}
       {consultaSelecionada && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', borderBottom: '1px solid var(--border)', paddingBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Stethoscope size={20} color="var(--primary)" />
-                <h4 style={{ fontSize: '16px', fontWeight: '700' }}>Registro de Prontuário Eletrônico (RF-06)</h4>
+        <div className="modal-overlay animate-fade-in" onClick={() => setConsultaSelecionada(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: '600' }}>Assinar Prontuário Digital (RF-06)</h3>
+              <button className="btn btn-secondary" style={{ padding: '4px 8px' }} onClick={() => setConsultaSelecionada(null)}>✕</button>
+            </div>
+
+            {erroPront && (
+              <div style={{ padding: '10px', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: '6px', fontSize: '13px', marginBottom: '14px' }}>
+                {erroPront}
               </div>
-              <button onClick={() => setConsultaSelecionada(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted-foreground)' }}>
-                <X size={20} />
-              </button>
-            </div>
-
-            <div style={{ backgroundColor: 'var(--secondary)', padding: '14px 16px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px', border: '1px solid var(--border)' }}>
-              <p style={{ marginBottom: '4px' }}><strong>Paciente:</strong> {consultaSelecionada.pacienteNome}</p>
-              <p style={{ marginBottom: '4px' }}><strong>Data & Hora:</strong> {consultaSelecionada.data} às {consultaSelecionada.hora}</p>
-              <p><strong>Motivo / Observação:</strong> {consultaSelecionada.observacao || '—'}</p>
-            </div>
-
-            {erroPront && <div style={{ padding: '10px 14px', backgroundColor: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }}>{erroPront}</div>}
+            )}
 
             <form onSubmit={handleSalvarProntuario} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Anamnese / Queixa Principal e Exame Físico:</label>
-                <textarea 
-                  rows={3} 
-                  value={anamnese} 
-                  onChange={e => setAnamnese(e.target.value)} 
-                  required 
-                  placeholder="Relato clínico, tempo de evolução e achados do exame físico..." 
-                />
+                <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Anamnese e Exame Clínico *</label>
+                <textarea rows={3} value={anamnese} onChange={e => setAnamnese(e.target.value)} required placeholder="Relate o histórico, sintomas relatados e evolução..." />
               </div>
 
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Diagnóstico Clínico / Código CID-10:</label>
-                <input 
-                  type="text" 
-                  value={diagnostico} 
-                  onChange={e => setDiagnostico(e.target.value)} 
-                  required 
-                  placeholder="ex: I10 - Hipertensão essencial ou J06 - Infecção aguda" 
-                />
+                <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Diagnóstico / Código CID-10 *</label>
+                <input type="text" value={diagnostico} onChange={e => setDiagnostico(e.target.value)} required placeholder="ex: I10 - Hipertensão essencial" />
               </div>
 
               <div>
-                <label style={{ fontSize: '13px', fontWeight: '600', display: 'block', marginBottom: '6px' }}>Prescrição Médica e Orientações Terapêuticas:</label>
-                <textarea 
-                  rows={4} 
-                  value={prescricao} 
-                  onChange={e => setPrescricao(e.target.value)} 
-                  required 
-                  placeholder="1. Medicamento X 500mg 8/8h por 7 dias&#10;2. Repouso por 3 dias&#10;3. Retorno com exames de laboratório" 
-                />
+                <label style={{ fontSize: '13px', fontWeight: '500', display: 'block', marginBottom: '6px' }}>Prescrição Médica e Orientações *</label>
+                <textarea rows={3} value={prescricao} onChange={e => setPrescricao(e.target.value)} required placeholder="Prescrição de medicamentos, repouso e exames recomendados..." />
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '14px', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
-                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setConsultaSelecionada(null)}>Cancelar</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 2 }}>
-                  <CheckCircle2 size={18} />
-                  Assinar Prontuário e Concluir
+              <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setConsultaSelecionada(null)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, fontWeight: '600' }}>
+                  Assinar Laudo e Anexar →
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
     </div>
   );
 }
